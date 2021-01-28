@@ -1,0 +1,51 @@
+artifacts:
+  exportOnCompletion: true
+variables: 
+  srcPath: /src
+  token: xxxxx
+preProcessors:
+  git:
+    image: diamonddragon/git-provider
+    environment:
+      GIT_ACCESS_TOKEN: ${var.token}
+      GIT_REPOSITORY_URL: https://diamond-dragon.visualstudio.com/ReviewItEasy/_git/ReviewItEasy.Analyzer
+    volumes:
+      sources: ${var.srcPath}
+analyzers:
+  roslyn:
+    image: diamonddragon/roslyn
+    environment:
+      SOLUTION_FILE_PATH: /src/ReviewItEasy.Analyzer.sln
+    volumes:
+      sources: ${var.srcPath}
+postProcessors:
+  roslyn-converter:
+    image: diamonddragon/file-converter
+    command:
+    - roslyn
+    - -o
+    - /artifacts/rolsyn-result.zip
+    - -f
+    - /artifacts/roslyn
+    - -s
+    - ${var.srcPath}/
+  evaluator:
+    image: diamonddragon/evaluator
+    command:
+    - evaluate
+    - -o
+    - /artifacts/evaluation-result.json
+    - -m
+    - /imports/manifest.yaml
+    - -f
+    - /artifacts/rolsyn-result.zip
+  templater:
+    image: diamonddragon/template-renderer
+    command:
+    - evaluate
+    - -o
+    - /artifacts/result.txt
+    - -t
+    - /imports/template.liquid
+    - -d
+    - /artifacts/evaluation-result.json    

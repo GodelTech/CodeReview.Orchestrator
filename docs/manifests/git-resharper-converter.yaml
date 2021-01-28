@@ -1,0 +1,50 @@
+artifacts:
+  exportOnCompletion: true
+variables: 
+  srcPath: /src
+  token: xxxxx
+preProcessors:
+  git:
+    image: diamonddragon/git-provider
+    environment:
+      GIT_ACCESS_TOKEN: ${var.token}
+      GIT_REPOSITORY_URL: https://xxxxxx
+    volumes:
+      sources: ${var.srcPath}
+analyzers:
+  resharper:
+    image: diamonddragon/resharper
+    environment:
+      SOLUTION_FILE_PATH: /src/Monolith.Warehouse.sln
+    volumes:
+      sources: ${var.srcPath}
+      artifacts: /artifacts
+postProcessors:
+  resharper-converter:
+    image: diamonddragon/file-converter
+    command:
+    - resharper
+    - -o
+    - /artifacts/resharper-result.zip
+    - -f
+    - /artifacts/resharper
+  evaluator:
+    image: diamonddragon/evaluator
+    command:
+    - evaluate
+    - -o
+    - /artifacts/evaluation-result.json
+    - -m
+    - /imports/manifest.yaml
+    - -f
+    - /artifacts/resharper-result.zip
+  templater:
+    image: diamonddragon/template-renderer
+    command:
+    - evaluate
+    - -o
+    - /artifacts/result.txt
+    - -t
+    - /imports/template.liquid
+    - -d
+    - /artifacts/evaluation-result.json        
