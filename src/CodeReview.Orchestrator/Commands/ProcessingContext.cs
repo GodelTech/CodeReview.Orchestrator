@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CodeReview.Orchestrator.Services;
+using GodelTech.CodeReview.Orchestrator.Services;
 
-namespace CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public class ProcessingContext : IProcessingContext
     {

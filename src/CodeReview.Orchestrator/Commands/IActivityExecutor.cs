@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Model;
 
-namespace CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public interface IActivityExecutor
     {

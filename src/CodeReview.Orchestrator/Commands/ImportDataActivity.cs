@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using CodeReview.Orchestrator.Model;
-using CodeReview.Orchestrator.Services;
+using GodelTech.CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
-namespace CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public class ImportDataActivity : IActivity
     {

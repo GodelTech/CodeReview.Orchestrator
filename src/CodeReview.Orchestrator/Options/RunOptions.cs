@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace CodeReview.Orchestrator.Options
+namespace GodelTech.CodeReview.Orchestrator.Options
 {
     [Verb("run", true, HelpText = "Runs workflow defined by manifest file.")]
     public class RunOptions

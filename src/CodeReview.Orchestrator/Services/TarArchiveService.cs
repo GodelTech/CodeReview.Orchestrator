@@ -4,7 +4,7 @@ using SharpCompress.Common;
 using SharpCompress.Readers;
 using SharpCompress.Writers;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class TarArchiveService : ITarArchiveService
     {

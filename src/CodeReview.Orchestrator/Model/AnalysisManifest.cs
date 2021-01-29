@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace CodeReview.Orchestrator.Model
+namespace GodelTech.CodeReview.Orchestrator.Model
 {
     public class AnalysisManifest
     {

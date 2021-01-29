@@ -1,4 +1,4 @@
-﻿namespace CodeReview.Orchestrator.Commands
+﻿namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public interface IProcessingContextFactory
     {

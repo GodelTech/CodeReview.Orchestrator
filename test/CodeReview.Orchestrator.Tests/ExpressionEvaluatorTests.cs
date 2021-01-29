@@ -1,9 +1,9 @@
-using CodeReview.Orchestrator.Services;
 using FakeItEasy;
 using FluentAssertions;
+using GodelTech.CodeReview.Orchestrator.Services;
 using Xunit;
 
-namespace CodeReview.Orchestrator.Tests
+namespace GodelTech.CodeReview.Orchestrator.Tests
 {
     public class ExpressionEvaluatorTests
     {

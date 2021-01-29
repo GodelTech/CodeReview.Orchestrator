@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Model;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class ManifestExpressionExpander : IManifestExpressionExpander
     {

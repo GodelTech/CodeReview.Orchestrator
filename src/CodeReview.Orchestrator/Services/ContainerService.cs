@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class ContainerService : IContainerService
     {

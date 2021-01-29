@@ -1,17 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using CodeReview.Orchestrator.Commands;
-using CodeReview.Orchestrator.Model;
-using CodeReview.Orchestrator.Options;
-using CodeReview.Orchestrator.Services;
-using CodeReview.Orchestrator.Utils;
 using CommandLine;
 using CommandLine.Text;
+using GodelTech.CodeReview.Orchestrator.Commands;
+using GodelTech.CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Options;
+using GodelTech.CodeReview.Orchestrator.Services;
+using GodelTech.CodeReview.Orchestrator.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CodeReview.Orchestrator
+namespace GodelTech.CodeReview.Orchestrator
 {
     // Replace PreProcessors, PostProcess and Analyzers with Activities and Parallel\Sequential run block which contains activities to execute in parallel (e.g. execution streams)
     // 1. If tool is published to NuGet it can be executed within pipline which has access to Docker Service and .NET Core

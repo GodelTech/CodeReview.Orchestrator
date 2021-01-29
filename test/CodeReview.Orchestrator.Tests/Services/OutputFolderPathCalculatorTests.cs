@@ -1,8 +1,8 @@
-﻿using CodeReview.Orchestrator.Services;
-using FluentAssertions;
+﻿using FluentAssertions;
+using GodelTech.CodeReview.Orchestrator.Services;
 using Xunit;
 
-namespace CodeReview.Orchestrator.Tests.Services
+namespace GodelTech.CodeReview.Orchestrator.Tests.Services
 {
     public class OutputFolderPathCalculatorTests
     {

@@ -1,6 +1,6 @@
-﻿using CodeReview.Orchestrator.Model;
+﻿using GodelTech.CodeReview.Orchestrator.Model;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface IManifestValidator
     {

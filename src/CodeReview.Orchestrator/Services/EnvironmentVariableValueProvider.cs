@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class EnvironmentVariableValueProvider : IEnvironmentVariableValueProvider
     {

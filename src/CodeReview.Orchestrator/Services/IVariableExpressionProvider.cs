@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface IVariableExpressionProvider
     {

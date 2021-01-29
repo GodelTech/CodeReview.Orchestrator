@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class ManifestValidator : IManifestValidator
     {

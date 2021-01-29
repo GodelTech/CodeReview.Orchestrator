@@ -1,7 +1,7 @@
 ﻿using System;
-using CodeReview.Orchestrator.Services;
+using GodelTech.CodeReview.Orchestrator.Services;
 
-namespace CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public class ProcessingContextFactory : IProcessingContextFactory
     {

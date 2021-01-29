@@ -1,6 +1,6 @@
 ﻿using Docker.DotNet;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class DockerClientFactory : IDockerClientFactory
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
 
-namespace CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class ManifestValidationRunner : AnalysisRunnerBase, IManifestValidationRunner
     {

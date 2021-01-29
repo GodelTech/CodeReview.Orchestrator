@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace CodeReview.Orchestrator.Options
+namespace GodelTech.CodeReview.Orchestrator.Options
 {
     [Verb("eval", HelpText = "Validates specified manifest.")]
     public class EvaluateOptions

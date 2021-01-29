@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
 
-namespace CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
     public class RunProcessorsActivity : IActivity
     {

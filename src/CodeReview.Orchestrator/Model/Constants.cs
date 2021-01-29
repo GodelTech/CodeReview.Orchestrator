@@ -1,4 +1,4 @@
-﻿namespace CodeReview.Orchestrator.Model
+﻿namespace GodelTech.CodeReview.Orchestrator.Model
 {
     internal static class Constants
     {
