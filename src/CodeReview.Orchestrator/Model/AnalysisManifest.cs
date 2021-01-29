@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ReviewItEasy.Orchestrator.Model
+namespace CodeReview.Orchestrator.Model
 {
     public class AnalysisManifest
     {

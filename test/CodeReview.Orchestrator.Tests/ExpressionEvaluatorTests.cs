@@ -1,10 +1,9 @@
-using System;
+using CodeReview.Orchestrator.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
-using ReviewItEasy.Orchestrator.Services;
 
-namespace ReviewItEasy.Orchestrator.Tests
+namespace CodeReview.Orchestrator.Tests
 {
     public class ExpressionEvaluatorTests
     {

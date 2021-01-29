@@ -1,7 +1,7 @@
 ﻿using System;
-using ReviewItEasy.Orchestrator.Services;
+using CodeReview.Orchestrator.Services;
 
-namespace ReviewItEasy.Orchestrator.Commands
+namespace CodeReview.Orchestrator.Commands
 {
     public class ProcessingContextFactory : IProcessingContextFactory
     {

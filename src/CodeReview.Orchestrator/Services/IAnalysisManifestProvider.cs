@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using ReviewItEasy.Orchestrator.Model;
+using CodeReview.Orchestrator.Model;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public interface IAnalysisManifestProvider
     {

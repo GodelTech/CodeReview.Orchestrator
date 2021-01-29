@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
+using CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
-using ReviewItEasy.Orchestrator.Model;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public abstract class AnalysisRunnerBase
     {

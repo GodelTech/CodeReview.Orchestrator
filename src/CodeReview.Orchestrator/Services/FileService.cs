@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public class FileService : IFileService
     {

@@ -1,4 +1,4 @@
-﻿namespace ReviewItEasy.Orchestrator.Services
+﻿namespace CodeReview.Orchestrator.Services
 {
     public class ContainerInfo
     {

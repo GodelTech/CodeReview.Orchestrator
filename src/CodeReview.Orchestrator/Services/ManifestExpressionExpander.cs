@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using ReviewItEasy.Orchestrator.Model;
+using CodeReview.Orchestrator.Model;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public class ManifestExpressionExpander : IManifestExpressionExpander
     {

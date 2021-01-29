@@ -2,7 +2,7 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public class YamlSerializer : IYamlSerializer
     {

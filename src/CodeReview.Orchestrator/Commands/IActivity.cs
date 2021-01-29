@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace ReviewItEasy.Orchestrator.Commands
+namespace CodeReview.Orchestrator.Commands
 {
     public interface IActivity
     {

@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
-using ReviewItEasy.Orchestrator.Services;
+﻿using CodeReview.Orchestrator.Services;
+using FluentAssertions;
 using Xunit;
 
-namespace ReviewItEasy.Orchestrator.Tests.Services
+namespace CodeReview.Orchestrator.Tests.Services
 {
     public class OutputFolderPathCalculatorTests
     {

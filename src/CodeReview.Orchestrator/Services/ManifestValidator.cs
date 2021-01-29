@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Reflection;
+using CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
-using ReviewItEasy.Orchestrator.Model;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public class ManifestValidator : IManifestValidator
     {

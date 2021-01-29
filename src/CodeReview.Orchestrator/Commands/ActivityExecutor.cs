@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CodeReview.Orchestrator.Model;
+using CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
-using ReviewItEasy.Orchestrator.Model;
-using ReviewItEasy.Orchestrator.Services;
 
-namespace ReviewItEasy.Orchestrator.Commands
+namespace CodeReview.Orchestrator.Commands
 {
     public class ActivityExecutor : IActivityExecutor
     {

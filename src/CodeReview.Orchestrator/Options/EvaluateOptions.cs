@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace ReviewItEasy.Orchestrator.Options
+namespace CodeReview.Orchestrator.Options
 {
     [Verb("eval", HelpText = "Validates specified manifest.")]
     public class EvaluateOptions

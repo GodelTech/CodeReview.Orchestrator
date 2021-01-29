@@ -1,17 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using CodeReview.Orchestrator.Commands;
+using CodeReview.Orchestrator.Model;
+using CodeReview.Orchestrator.Options;
+using CodeReview.Orchestrator.Services;
+using CodeReview.Orchestrator.Utils;
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ReviewItEasy.Orchestrator.Commands;
-using ReviewItEasy.Orchestrator.Model;
-using ReviewItEasy.Orchestrator.Options;
-using ReviewItEasy.Orchestrator.Services;
-using ReviewItEasy.Orchestrator.Utils;
 
-namespace ReviewItEasy.Orchestrator
+namespace CodeReview.Orchestrator
 {
     // Replace PreProcessors, PostProcess and Analyzers with Activities and Parallel\Sequential run block which contains activities to execute in parallel (e.g. execution streams)
     // 1. If tool is published to NuGet it can be executed within pipline which has access to Docker Service and .NET Core

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
-using ReviewItEasy.Orchestrator.Model;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public class AnalysisManifestProvider : IAnalysisManifestProvider
     {

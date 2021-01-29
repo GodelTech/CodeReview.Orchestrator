@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace ReviewItEasy.Orchestrator.Options
+namespace CodeReview.Orchestrator.Options
 {
     [Verb("run", true, HelpText = "Runs workflow defined by manifest file.")]
     public class RunOptions

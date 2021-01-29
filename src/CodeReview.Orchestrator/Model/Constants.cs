@@ -1,4 +1,4 @@
-﻿namespace ReviewItEasy.Orchestrator.Model
+﻿namespace CodeReview.Orchestrator.Model
 {
     internal static class Constants
     {

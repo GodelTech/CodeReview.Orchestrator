@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ReviewItEasy.Orchestrator.Services;
+using CodeReview.Orchestrator.Services;
 
-namespace ReviewItEasy.Orchestrator.Commands
+namespace CodeReview.Orchestrator.Commands
 {
     public class ProcessingContext : IProcessingContext
     {

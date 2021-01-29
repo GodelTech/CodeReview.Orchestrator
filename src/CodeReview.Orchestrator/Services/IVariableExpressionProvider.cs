@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ReviewItEasy.Orchestrator.Services
+namespace CodeReview.Orchestrator.Services
 {
     public interface IVariableExpressionProvider
     {
