@@ -5,7 +5,7 @@ variables:
   token: xxxxx
 preProcessors:
   git:
-    image: diamonddragon/git-provider
+    image: godeltech/codereview.tools.gitprovider
     environment:
       GIT_ACCESS_TOKEN: ${var.token}
       GIT_REPOSITORY_URL: https://xxxxxx
@@ -13,7 +13,7 @@ preProcessors:
       sources: ${var.srcPath}
 analyzers:
   resharper:
-    image: diamonddragon/resharper
+    image: godeltech/codereview.analyzers.inspectcode
     environment:
       SOLUTION_FILE_PATH: /src/Monolith.Warehouse.sln
     volumes:
@@ -21,7 +21,7 @@ analyzers:
       artifacts: /artifacts
 postProcessors:
   resharper-converter:
-    image: diamonddragon/file-converter
+    image: godeltech/codereview.file-converter
     command:
     - resharper
     - -o
@@ -29,7 +29,7 @@ postProcessors:
     - -f
     - /artifacts/resharper
   evaluator:
-    image: diamonddragon/evaluator
+    image: godeltech/codereview.evaluator
     command:
     - evaluate
     - -o
@@ -39,7 +39,7 @@ postProcessors:
     - -f
     - /artifacts/resharper-result.zip
   templater:
-    image: diamonddragon/template-renderer
+    image: godeltech/codereview.template-renderer
     command:
     - evaluate
     - -o

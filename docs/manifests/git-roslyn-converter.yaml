@@ -5,7 +5,7 @@ variables:
   token: xxxxx
 preProcessors:
   git:
-    image: diamonddragon/git-provider
+    image: godeltech/codereview.tools.gitprovider
     environment:
       GIT_ACCESS_TOKEN: ${var.token}
       GIT_REPOSITORY_URL: https://diamond-dragon.visualstudio.com/ReviewItEasy/_git/ReviewItEasy.Analyzer
@@ -13,14 +13,14 @@ preProcessors:
       sources: ${var.srcPath}
 analyzers:
   roslyn:
-    image: diamonddragon/roslyn
+    image: godeltech/codereview.analyzers.roslyn
     environment:
       SOLUTION_FILE_PATH: /src/ReviewItEasy.Analyzer.sln
     volumes:
       sources: ${var.srcPath}
 postProcessors:
   roslyn-converter:
-    image: diamonddragon/file-converter
+    image: godeltech/codereview.file-converter
     command:
     - roslyn
     - -o
@@ -30,7 +30,7 @@ postProcessors:
     - -s
     - ${var.srcPath}/
   evaluator:
-    image: diamonddragon/evaluator
+    image: godeltech/codereview.evaluator
     command:
     - evaluate
     - -o
@@ -40,7 +40,7 @@ postProcessors:
     - -f
     - /artifacts/rolsyn-result.zip
   templater:
-    image: diamonddragon/template-renderer
+    image: godeltech/codereview.template-renderer
     command:
     - evaluate
     - -o
