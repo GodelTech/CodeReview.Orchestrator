@@ -10,16 +10,13 @@ namespace GodelTech.CodeReview.Orchestrator.Services
     {
         private readonly IDirectoryService _directoryService;
         private readonly IOutputFolderPathCalculator _outputFolderPathCalculator;
-        private readonly IPathService _pathService;
 
         public TarArchiveService(
             IDirectoryService directoryService,
-            IOutputFolderPathCalculator outputFolderPathCalculator,
-            IPathService pathService)
+            IOutputFolderPathCalculator outputFolderPathCalculator)
         {
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
             _outputFolderPathCalculator = outputFolderPathCalculator ?? throw new ArgumentNullException(nameof(outputFolderPathCalculator));
-            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
         
         public Stream Create(string path)
@@ -69,17 +66,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     Overwrite = true
                 });
             }
-        }
-
-        private string CalculateOutputDirectoryName(string folderPath, int pathToRemoveLength, string archiveEntryPath)
-        {
-            var fullPath = _pathService.GetFullPath(folderPath);
-            var entryDirectoryName = _pathService.GetDirectoryName(archiveEntryPath);
-
-            // TODO: Path doesn't container / (e.g. artifats/roslyn.zip)
-            // as result when /artifacts is removed from artifacts (without slash) issue thrown
-            
-            return _pathService.Combine(fullPath, entryDirectoryName.Substring(pathToRemoveLength));
         }
     }
 }

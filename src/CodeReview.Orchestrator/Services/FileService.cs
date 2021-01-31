@@ -24,11 +24,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             return File.WriteAllTextAsync(path, text);
         }
 
-        public FileStream Create(string path)
-        {
-            return File.Create(path);
-        }
-
         public bool Exists(string path)
         {
             return File.Exists(path);

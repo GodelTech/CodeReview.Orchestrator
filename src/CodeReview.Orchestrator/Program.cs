@@ -14,10 +14,6 @@ using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator
 {
-    // Replace PreProcessors, PostProcess and Analyzers with Activities and Parallel\Sequential run block which contains activities to execute in parallel (e.g. execution streams)
-    // 1. If tool is published to NuGet it can be executed within pipline which has access to Docker Service and .NET Core
-    // 2. Add ability to specify URL to docker service
-    // 3. Print logs immediately once they are produced
     class Program
     {
         private static int Main(string[] args)

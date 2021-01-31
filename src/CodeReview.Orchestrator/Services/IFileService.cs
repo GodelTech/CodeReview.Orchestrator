@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
@@ -7,7 +6,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
     {
         Task<string> ReadAllTextAsync(string path);
         Task WriteAllTextAsync(string path, string text);
-        FileStream Create(string path);
         bool Exists(string path);
     }
 }

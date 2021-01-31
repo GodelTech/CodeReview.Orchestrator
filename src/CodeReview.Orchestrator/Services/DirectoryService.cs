@@ -9,11 +9,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             return Directory.Exists(path);
         }
 
-        public string[] GetFiles(string path, string pattern, SearchOption options)
-        {
-            return Directory.GetFiles(path, pattern, options);
-        }
-
         public DirectoryInfo CreateDirectory(string path)
         {
             return Directory.CreateDirectory(path);
