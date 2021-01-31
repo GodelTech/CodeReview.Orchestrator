@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
-namespace GodelTech.CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
-    public class ManifestValidationRunner : AnalysisRunnerBase, IManifestValidationRunner
+    public class ValidateManifestCommand : AnalysisRunnerBase, IValidateManifestCommand
     {
         private readonly IFileService _fileService;
         private readonly IYamlSerializer _yamlSerializer;
 
-        public ManifestValidationRunner(
+        public ValidateManifestCommand(
             IAnalysisManifestProvider analysisManifestProvider,
             IManifestValidator manifestValidator,
             IManifestExpressionExpander manifestExpressionExpander,
@@ -23,7 +24,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _yamlSerializer = yamlSerializer ?? throw new ArgumentNullException(nameof(yamlSerializer));
         }
 
-        public async Task<int> RunAsync(string manifestPath, string outputFilePath)
+        public async Task<int> ExecuteAsync(string manifestPath, string outputFilePath)
         {
             if (string.IsNullOrWhiteSpace(manifestPath))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(manifestPath));

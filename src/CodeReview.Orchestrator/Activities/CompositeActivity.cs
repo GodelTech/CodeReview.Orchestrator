@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace GodelTech.CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class CompositeActivity : IActivity
     {

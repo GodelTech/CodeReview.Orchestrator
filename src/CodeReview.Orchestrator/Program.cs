@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
+using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Commands;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Options;
@@ -55,17 +56,17 @@ namespace GodelTech.CodeReview.Orchestrator
 
         private static async Task<int> ProcessEvaluateAsync(EvaluateOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<IManifestValidationRunner>().RunAsync(options.File, options.OutputPath);
+            return await container.GetRequiredService<IValidateManifestCommand>().ExecuteAsync(options.File, options.OutputPath);
         }
 
         private static async Task<int> ProcessNewAsync(NewOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<INewManifestRunner>().RunAsync(options.File);
+            return await container.GetRequiredService<ICreateNewManifestCommand>().ExecuteAsync(options.File);
         }
 
         private static async Task<int> ProcessRunAsync(RunOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<IAnalysisRunner>().RunAsync(options.File);
+            return await container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options.File);
         }
 
         private static ServiceProvider CreateServiceProvider()
@@ -97,9 +98,9 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddTransient<IContainerService, ContainerService>();
             serviceProvider.AddTransient<IManifestValidator, ManifestValidator>();
             serviceProvider.AddTransient<IManifestExpressionExpander, ManifestExpressionExpander>();
-            serviceProvider.AddTransient<IAnalysisRunner, AnalysisRunner>();
-            serviceProvider.AddTransient<INewManifestRunner, NewManifestRunner>();
-            serviceProvider.AddTransient<IManifestValidationRunner, ManifestValidationRunner>();
+            serviceProvider.AddTransient<IRunAnalysisCommand, RunAnalysisCommand>();
+            serviceProvider.AddTransient<ICreateNewManifestCommand, CreateNewManifestCommand>();
+            serviceProvider.AddTransient<IValidateManifestCommand, ValidateManifestCommand>();
             serviceProvider.AddTransient<IOutputFolderPathCalculator, OutputFolderPathCalculator>();
 
             return serviceProvider.BuildServiceProvider();
