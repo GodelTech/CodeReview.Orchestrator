@@ -2,7 +2,7 @@
   "profiles": {
     "ReviewItEasy.Orchestrator": {
       "commandName": "Project",
-      "commandLineArgs": "run -f ../../../../../docs/manifests/git-resharper-converter.yaml"
+      "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-converter.yaml"
     }
   }
 }
