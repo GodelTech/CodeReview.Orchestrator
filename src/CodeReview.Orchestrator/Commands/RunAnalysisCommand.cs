@@ -36,18 +36,19 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
             
             Logger.LogInformation("Preparing Docker Volumes...");
 
-            await using var context = _processingContextFactory.Create();
+            await using (var context = _processingContextFactory.Create())
+            {
+                await context.InitializeAsync();
+                Logger.LogInformation("Docker Volumes created");
 
-            await context.InitializeAsync();
-            Logger.LogInformation("Docker Volumes created");
+                var activity = _activityFactory.Create(manifest);
 
-            var activity = _activityFactory.Create(manifest);
+                Logger.LogInformation("Processing started.");
+                var isSuccess = await activity.ExecuteAsync(context);
+                Logger.LogInformation("Processing completed: {executionResult}", isSuccess ? "Success" : "Failure");
 
-            Logger.LogInformation("Processing started.");
-            var isSuccess = await activity.ExecuteAsync(context);
-            Logger.LogInformation("Processing completed: {executionResult}", isSuccess ? "Success" : "Failure");
-
-            return isSuccess ? Constants.SuccessExitCode : Constants.ErrorExitCode;
+                return isSuccess ? Constants.SuccessExitCode : Constants.ErrorExitCode;
+            }
         }
     }
 }
