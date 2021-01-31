@@ -2,24 +2,21 @@ artifacts:
   exportOnCompletion: true
 variables: 
   srcPath: /src
-  token: xxxxx
-preProcessors:
+activities:
   git:
     image: godeltech/codereview.tools.gitprovider
     environment:
-      GIT_ACCESS_TOKEN: ${var.token}
-      GIT_REPOSITORY_URL: https://xxxxxx
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
     volumes:
       sources: ${var.srcPath}
-analyzers:
   resharper:
     image: godeltech/codereview.analyzers.inspectcode
     environment:
-      SOLUTION_FILE_PATH: /src/Monolith.Warehouse.sln
+      SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
       sources: ${var.srcPath}
       artifacts: /artifacts
-postProcessors:
   resharper-converter:
     image: godeltech/codereview.file-converter
     command:

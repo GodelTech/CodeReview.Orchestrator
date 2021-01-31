@@ -29,7 +29,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             
             manifest.Variables = manifest.Variables.ToDictionary(x => x.Key, x => _expressionEvaluator.Evaluate(x.Value), StringComparer.OrdinalIgnoreCase);
 
-            foreach (var activity in manifest.PreProcessors.Concat(manifest.Analyzers).Concat(manifest.PostProcessors))
+            foreach (var activity in manifest.Activities)
             {
                 ExpandActivity(activity.Value);
             }

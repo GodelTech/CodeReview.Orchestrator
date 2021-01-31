@@ -15,12 +15,6 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         public Dictionary<string, string> Variables { get; set; } = new();
 
         [Required]
-        public Dictionary<string, ActivityManifest> PreProcessors { get; set; } = new();
-
-        [Required]
-        public Dictionary<string, ActivityManifest> Analyzers { get; set; } = new();
-
-        [Required]
-        public Dictionary<string, ActivityManifest> PostProcessors { get; set; } = new();
+        public Dictionary<string, ActivityManifest> Activities { get; set; } = new();
     }
 }

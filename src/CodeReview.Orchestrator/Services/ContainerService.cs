@@ -45,22 +45,21 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     })
                 .ToArray();
 
-            using (var client = _dockerClientFactory.Create())
+            using var client = _dockerClientFactory.Create();
+            
+            var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
             {
-                var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
+                Image = imageName,
+                Env = (envVariables ?? ImmutableDictionary<string, string>.Empty).Select(x => x.Key + "=" + x.Value)
+                    .ToArray(),
+                HostConfig = new HostConfig
                 {
-                    Image = imageName,
-                    Env = (envVariables ?? ImmutableDictionary<string, string>.Empty).Select(x => x.Key + "=" + x.Value)
-                        .ToArray(),
-                    HostConfig = new HostConfig
-                    {
-                        Mounts = mounts
-                    },
-                    Cmd = commandLineArgs
-                });
+                    Mounts = mounts
+                },
+                Cmd = commandLineArgs
+            });
 
-                return createResult.ID;
-            }
+            return createResult.ID;
         }
 
         public async Task WaitContainer(string containerId, long waitTimeoutSeconds = 900)
@@ -70,11 +69,10 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (waitTimeoutSeconds <= 0) 
                 throw new ArgumentOutOfRangeException(nameof(waitTimeoutSeconds));
 
-            using (var client = _dockerClientFactory.Create())
-            using (var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(waitTimeoutSeconds)))
-            {
-                await client.Containers.WaitContainerAsync(containerId, tokenSource.Token);
-            }
+            using var client = _dockerClientFactory.Create();
+            using var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(waitTimeoutSeconds));
+            
+            await client.Containers.WaitContainerAsync(containerId, tokenSource.Token);
         }
 
         public async Task ImportFilesIntoContainerAsync(string containerId, string containerPath, Stream inStream)
@@ -86,17 +84,16 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerPath))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerPath));
 
-            using (var client = _dockerClientFactory.Create())
-            {
-                await client.Containers.ExtractArchiveToContainerAsync(
-                    containerId,
-                    new ContainerPathStatParameters
-                    {
-                        Path = containerPath,
-                        AllowOverwriteDirWithFile = true
-                    },
-                    inStream);
-            }
+            using var client = _dockerClientFactory.Create();
+            
+            await client.Containers.ExtractArchiveToContainerAsync(
+                containerId,
+                new ContainerPathStatParameters
+                {
+                    Path = containerPath,
+                    AllowOverwriteDirWithFile = true
+                },
+                inStream);
         }
 
         public async Task ExportFilesFromContainerAsync(string containerId, string containerPath, Stream outStream)
@@ -108,18 +105,17 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerPath))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerPath));
 
-            using (var client = _dockerClientFactory.Create())
-            {
-                var result = await client.Containers.GetArchiveFromContainerAsync(
-                    containerId,
-                    new GetArchiveFromContainerParameters
-                    {
-                        Path = containerPath
-                    },
-                    false);
+            using var client = _dockerClientFactory.Create();
+            
+            var result = await client.Containers.GetArchiveFromContainerAsync(
+                containerId,
+                new GetArchiveFromContainerParameters
+                {
+                    Path = containerPath
+                },
+                false);
 
-                await result.Stream.CopyToAsync(outStream);
-            }
+            await result.Stream.CopyToAsync(outStream);
         }
 
         public async Task StartContainerAsync(string containerId)
@@ -127,10 +123,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
-            using (var client = _dockerClientFactory.Create())
-            {
-                await client.Containers.StartContainerAsync(containerId, new ContainerStartParameters());
-            }
+            using var client = _dockerClientFactory.Create();
+            
+            await client.Containers.StartContainerAsync(containerId, new ContainerStartParameters());
         }
 
         public async Task StopContainerAsync(string containerId, int waitBeforeKillSeconds = 30)
@@ -140,13 +135,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (waitBeforeKillSeconds <= 0)
                 throw new ArgumentOutOfRangeException(nameof(waitBeforeKillSeconds));
 
-            using (var client = _dockerClientFactory.Create())
+            using var client = _dockerClientFactory.Create();
+            
+            await client.Containers.StopContainerAsync(containerId, new ContainerStopParameters
             {
-                await client.Containers.StopContainerAsync(containerId, new ContainerStopParameters
-                {
-                    WaitBeforeKillSeconds = (uint) waitBeforeKillSeconds
-                });
-            }
+                WaitBeforeKillSeconds = (uint) waitBeforeKillSeconds
+            });
         }
 
         public async Task RemoveContainerAsync(string containerId, bool force = false)
@@ -154,13 +148,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
-            using (var client = _dockerClientFactory.Create())
+            using var client = _dockerClientFactory.Create();
+            
+            await client.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters
             {
-                await client.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters
-                {
-                    Force = force
-                });
-            }
+                Force = force
+            });
         }
 
         public async Task<ContainerLogs> GetContainerLogsAsync(string containerId)
@@ -168,34 +161,32 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
-            using (var client = _dockerClientFactory.Create())
-            {
-                var contentStream = await client.Containers.GetContainerLogsAsync(containerId, false,
-                    new ContainerLogsParameters
-                    {
-                        ShowStderr = true,
-                        ShowStdout = true,
-                        Timestamps = false
-                    });
-
-                using (contentStream)
-                using (var stdOutStream = new MemoryStream())
-                using (var stdInStream = new MemoryStream())
-                using (var stdErrStream = new MemoryStream())
+            using var client = _dockerClientFactory.Create();
+            var contentStream = await client.Containers.GetContainerLogsAsync(containerId, false,
+                new ContainerLogsParameters
                 {
-                    await contentStream.CopyOutputToAsync(stdInStream, stdOutStream, stdErrStream, default);
+                    ShowStderr = true,
+                    ShowStdout = true,
+                    Timestamps = false
+                });
 
-                    stdOutStream.Position = 0;
+            using (contentStream)
+            await using (var stdOutStream = new MemoryStream())
+            await using (var stdInStream = new MemoryStream())
+            await using (var stdErrStream = new MemoryStream())
+            {
+                await contentStream.CopyOutputToAsync(stdInStream, stdOutStream, stdErrStream, default);
 
-                    using (var stdOutReader = new StreamReader(stdOutStream))
-                    using (var stdErrReader = new StreamReader(stdErrStream))
+                stdOutStream.Position = 0;
+
+                using (var stdOutReader = new StreamReader(stdOutStream))
+                using (var stdErrReader = new StreamReader(stdErrStream))
+                {
+                    return new ContainerLogs
                     {
-                        return new ContainerLogs
-                        {
-                            StdErr = await stdErrReader.ReadToEndAsync(),
-                            StdOut = await stdOutReader.ReadToEndAsync()
-                        };
-                    }
+                        StdErr = await stdErrReader.ReadToEndAsync(),
+                        StdOut = await stdOutReader.ReadToEndAsync()
+                    };
                 }
             }
         }
@@ -205,16 +196,14 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(volumePrefix))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumePrefix));
 
-            using (var client = _dockerClientFactory.Create())
+            using var client = _dockerClientFactory.Create();
+            
+            var result = await client.Volumes.CreateAsync(new VolumesCreateParameters
             {
+                Name = _nameFactory.CreateVolumeName(volumePrefix)
+            });
 
-                var result = await client.Volumes.CreateAsync(new VolumesCreateParameters
-                {
-                    Name = _nameFactory.CreateVolumeName(volumePrefix)
-                });
-
-                return result.Name;
-            }
+            return result.Name;
         }
 
         public async Task RemoveVolumeAsync(string volumeId)
@@ -222,10 +211,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(volumeId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumeId));
 
-            using (var client = _dockerClientFactory.Create())
-            {
-                await client.Volumes.RemoveAsync(volumeId);
-            }
+            using var client = _dockerClientFactory.Create();
+            
+            await client.Volumes.RemoveAsync(volumeId);
         }
 
 
@@ -234,25 +222,24 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
-            using (var client = _dockerClientFactory.Create())
+            using var client = _dockerClientFactory.Create();
+            
+            try
             {
-                try
-                {
-                    var container = await client.Containers.InspectContainerAsync(containerId);
-                    if (container == null)
-                        return null;
-
-                    return new ContainerInfo
-                    {
-                        Id = container.ID,
-                        Status = container.State.Status,
-                        ExitCode = container.State.ExitCode
-                    };
-                }
-                catch (DockerContainerNotFoundException)
-                {
+                var container = await client.Containers.InspectContainerAsync(containerId);
+                if (container == null)
                     return null;
-                }
+
+                return new ContainerInfo
+                {
+                    Id = container.ID,
+                    Status = container.State.Status,
+                    ExitCode = container.State.ExitCode
+                };
+            }
+            catch (DockerContainerNotFoundException)
+            {
+                return null;
             }
         }
     }

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Services;
 
-namespace GodelTech.CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class ProcessingContext : IProcessingContext
     {

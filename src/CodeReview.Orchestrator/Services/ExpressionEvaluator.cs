@@ -12,7 +12,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         private const string EnvironmentVariableExpressionType = "env";
         private const string VariableExpressionType = "var";
         
-        private static readonly Regex ExpressionPattern = new Regex(@"\${\s*(?<expressionType>var|env)\s*\.\s*(?<expression>[^}]+)\s*}", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private static readonly Regex ExpressionPattern = new(@"\${\s*(?<expressionType>var|env)\s*\.\s*(?<expression>[^}]+)\s*}", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         public ExpressionEvaluator(
             IVariableExpressionProvider variableExpressionProvider,

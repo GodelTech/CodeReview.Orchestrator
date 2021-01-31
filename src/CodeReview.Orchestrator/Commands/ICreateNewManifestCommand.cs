@@ -2,8 +2,8 @@
 
 namespace GodelTech.CodeReview.Orchestrator.Commands
 {
-    public interface IActivity
+    public interface ICreateNewManifestCommand
     {
-        Task<bool> ExecuteAsync(IProcessingContext context);
+        Task<int> ExecuteAsync(string filePath);
     }
 }

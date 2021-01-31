@@ -2,23 +2,20 @@ artifacts:
   exportOnCompletion: true
 variables: 
   srcPath: /src
-  token: xxxxx
-preProcessors:
+activities:
   git:
     image: godeltech/codereview.tools.gitprovider
     environment:
-      GIT_ACCESS_TOKEN: ${var.token}
-      GIT_REPOSITORY_URL: https://diamond-dragon.visualstudio.com/ReviewItEasy/_git/ReviewItEasy.Analyzer
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
     volumes:
       sources: ${var.srcPath}
-analyzers:
   roslyn:
     image: godeltech/codereview.analyzers.roslyn
     environment:
-      SOLUTION_FILE_PATH: /src/ReviewItEasy.Analyzer.sln
+      SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
       sources: ${var.srcPath}
-postProcessors:
   roslyn-converter:
     image: godeltech/codereview.file-converter
     command:

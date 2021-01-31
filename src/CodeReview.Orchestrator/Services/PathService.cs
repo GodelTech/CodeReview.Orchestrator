@@ -4,11 +4,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class PathService : IPathService
     {
-        public string GetFileName(string path)
-        {
-            return Path.GetFileName(path);
-        }
-
         public string GetDirectoryName(string path)
         {
             return Path.GetDirectoryName(path);

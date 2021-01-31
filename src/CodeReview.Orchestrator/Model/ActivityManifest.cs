@@ -10,13 +10,13 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         public string Image { get; set; }
 
         [Required] 
-        public Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Environment { get; set; } = new();
         
         [Required]
-        public VolumesManifest Volumes { get; set; } = new VolumesManifest();
+        public VolumesManifest Volumes { get; set; } = new();
         
         [Required]
-        public ActivitySettings Settings { get; set; } = new ActivitySettings();
+        public ActivitySettings Settings { get; set; } = new();
 
         public string[] Command { get; set; }
     }

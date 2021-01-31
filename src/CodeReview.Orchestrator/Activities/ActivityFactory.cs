@@ -3,7 +3,7 @@ using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
-namespace GodelTech.CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class ActivityFactory : IActivityFactory
     {
@@ -44,18 +44,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                     _pathService,
                     _loggerFactory.CreateLogger<ImportDataActivity>()),
                 new RunProcessorsActivity(
-                    manifest.PreProcessors, 
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunProcessorsActivity>()),
-                new RunAnalyzersActivity(
-                    Constants.WorkerImage,
-                    manifest.Analyzers,
-                    _containerService,
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunAnalyzersActivity>()
-                    ),
-                new RunProcessorsActivity(
-                    manifest.PostProcessors,
+                    manifest.Activities, 
                     _activityExecutor,
                     _loggerFactory.CreateLogger<RunProcessorsActivity>()),
                 new ExportArtifactsActivity(

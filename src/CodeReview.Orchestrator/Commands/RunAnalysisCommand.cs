@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GodelTech.CodeReview.Orchestrator.Commands;
+using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
-namespace GodelTech.CodeReview.Orchestrator.Services
+namespace GodelTech.CodeReview.Orchestrator.Commands
 {
-    public class AnalysisRunner : AnalysisRunnerBase, IAnalysisRunner
+    public class RunAnalysisCommand : AnalysisRunnerBase, IRunAnalysisCommand
     {
         private readonly IActivityFactory _activityFactory;
         private readonly IProcessingContextFactory _processingContextFactory;
 
-        public AnalysisRunner(
+        public RunAnalysisCommand(
             IAnalysisManifestProvider analysisManifestProvider,
             IManifestValidator manifestValidator,
             IManifestExpressionExpander manifestExpressionExpander,
@@ -24,7 +25,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _processingContextFactory = processingContextFactory ?? throw new ArgumentNullException(nameof(processingContextFactory));
         }
 
-        public async Task<int> RunAsync(string manifestPath)
+        public async Task<int> ExecuteAsync(string manifestPath)
         {
             if (string.IsNullOrWhiteSpace(manifestPath))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(manifestPath));
@@ -36,7 +37,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             Logger.LogInformation("Preparing Docker Volumes...");
 
             await using var context = _processingContextFactory.Create();
-
+            
             await context.InitializeAsync();
             Logger.LogInformation("Docker Volumes created");
 

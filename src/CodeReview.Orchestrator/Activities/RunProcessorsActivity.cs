@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
 
-namespace GodelTech.CodeReview.Orchestrator.Commands
+namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class RunProcessorsActivity : IActivity
     {
