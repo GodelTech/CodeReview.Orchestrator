@@ -2,7 +2,7 @@ artifacts:
   exportOnCompletion: true
 variables: 
   srcPath: /src
-preProcessors:
+activities:
   git:
     image: godeltech/codereview.tools.gitprovider
     environment:
@@ -10,7 +10,6 @@ preProcessors:
       GIT_BRANCH: main
     volumes:
       sources: ${var.srcPath}
-analyzers:
   resharper:
     image: godeltech/codereview.analyzers.inspectcode
     environment:
@@ -18,7 +17,6 @@ analyzers:
     volumes:
       sources: ${var.srcPath}
       artifacts: /artifacts
-postProcessors:
   resharper-converter:
     image: godeltech/codereview.file-converter
     command:

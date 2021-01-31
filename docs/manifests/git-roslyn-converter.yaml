@@ -2,7 +2,7 @@ artifacts:
   exportOnCompletion: true
 variables: 
   srcPath: /src
-preProcessors:
+activities:
   git:
     image: godeltech/codereview.tools.gitprovider
     environment:
@@ -10,14 +10,12 @@ preProcessors:
       GIT_BRANCH: main
     volumes:
       sources: ${var.srcPath}
-analyzers:
   roslyn:
     image: godeltech/codereview.analyzers.roslyn
     environment:
       SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
       sources: ${var.srcPath}
-postProcessors:
   roslyn-converter:
     image: godeltech/codereview.file-converter
     command:
