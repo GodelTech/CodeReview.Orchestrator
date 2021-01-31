@@ -39,7 +39,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                     ["MY_VAR_1"] = "Value1",
                     ["MY_VAR_2"] = "Value2"
                 },
-                PreProcessors = new ()
+                Activities = new ()
                 {
                     ["git"] = new()
                     {
@@ -64,11 +64,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             "mkdir",
                             "/mydir"
                         }
-                    }
-                },
-
-                Analyzers = new()
-                {
+                    },
                     ["resharper"] = new()
                     {
                         Environment = new()
@@ -117,34 +113,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             "/mydir"
                         }
                     }
-                },
-                PostProcessors = new()
-                {
-                    ["git"] = new()
-                    {
-                        Environment = new()
-                        {
-                            ["MY_VAR_1"] = "Value1",
-                            ["MY_VAR_2"] = "Value2"
-                        },
-                        Image = "dragon/persister",
-                        Volumes = new()
-                        {
-                            Artifacts = "/artifacts",
-                            Sources = "/src",
-                            Imports = "/imports"
-                        },
-                        Settings = new()
-                        {
-                            WaitTimeoutSeconds = 3000
-                        },
-                        Command = new[]
-                        {
-                            "mkdir",
-                            "/mydir"
-                        }
-                    }
-                },
+                }
             };
 
             var yaml = _yamlSerializer.Serialize(manifest);

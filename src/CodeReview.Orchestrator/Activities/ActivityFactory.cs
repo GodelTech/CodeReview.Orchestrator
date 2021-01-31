@@ -44,18 +44,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     _pathService,
                     _loggerFactory.CreateLogger<ImportDataActivity>()),
                 new RunProcessorsActivity(
-                    manifest.PreProcessors, 
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunProcessorsActivity>()),
-                new RunAnalyzersActivity(
-                    Constants.WorkerImage,
-                    manifest.Analyzers,
-                    _containerService,
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunAnalyzersActivity>()
-                    ),
-                new RunProcessorsActivity(
-                    manifest.PostProcessors,
+                    manifest.Activities, 
                     _activityExecutor,
                     _loggerFactory.CreateLogger<RunProcessorsActivity>()),
                 new ExportArtifactsActivity(
