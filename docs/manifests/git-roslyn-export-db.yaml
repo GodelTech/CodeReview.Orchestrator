@@ -10,38 +10,29 @@ activities:
       GIT_BRANCH: main
     volumes:
       sources: ${var.srcPath}
-  resharper:
-    image: godeltech/codereview.analyzers.inspectcode
+  roslyn:
+    image: godeltech/codereview.analyzers.roslyn
     environment:
       SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
       sources: ${var.srcPath}
-      artifacts: /artifacts
-  resharper-converter:
+  roslyn-converter:
     image: godeltech/codereview.file-converter
     command:
-    - resharper
+    - roslyn
     - -o
-    - /artifacts/resharper-result.zip
+    - /artifacts/rolsyn-result.zip
     - -f
-    - /artifacts/result.xml
+    - /artifacts
+    - -s
+    - ${var.srcPath}/
+    - -m
+    - '*.roslyn.json'
   evaluator:
     image: godeltech/codereview.evaluator
     command:
-    - evaluate
+    - export-db
     - -o
-    - /artifacts/evaluation-result.json
-    - -m
-    - /imports/manifest.yaml
+    - /artifacts/issues.db
     - -f
-    - /artifacts/resharper-result.zip
-  templater:
-    image: godeltech/codereview.template-renderer
-    command:
-    - evaluate
-    - -o
-    - /artifacts/result.txt
-    - -t
-    - /imports/template.liquid
-    - -d
-    - /artifacts/evaluation-result.json        
+    - /artifacts/rolsyn-result.zip

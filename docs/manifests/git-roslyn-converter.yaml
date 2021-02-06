@@ -23,9 +23,11 @@ activities:
     - -o
     - /artifacts/rolsyn-result.zip
     - -f
-    - /artifacts/roslyn
+    - /artifacts
     - -s
     - ${var.srcPath}/
+    - -m
+    - '*.roslyn.json'    
   evaluator:
     image: godeltech/codereview.evaluator
     command:
