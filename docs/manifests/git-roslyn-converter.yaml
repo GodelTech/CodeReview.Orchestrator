@@ -20,13 +20,13 @@ activities:
     image: godeltech/codereview.file-converter
     command:
     - roslyn
-    - -o
+    - --output
     - /artifacts/rolsyn-result.zip
-    - -f
+    - --folder
     - /artifacts
-    - -s
+    - --src
     - ${var.srcPath}/
-    - -m
+    - --mask
     - '*.roslyn.json'    
   evaluator:
     image: godeltech/codereview.evaluator
@@ -34,17 +34,17 @@ activities:
     - evaluate
     - -o
     - /artifacts/evaluation-result.json
-    - -m
+    - --manifest
     - /imports/manifest.yaml
-    - -f
+    - --folder
     - /artifacts/rolsyn-result.zip
   templater:
     image: godeltech/codereview.template-renderer
     command:
     - evaluate
-    - -o
+    - --output
     - /artifacts/result.txt
-    - -t
+    - --template
     - /imports/template.liquid
-    - -d
+    - --data
     - /artifacts/evaluation-result.json    
