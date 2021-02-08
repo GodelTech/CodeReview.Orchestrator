@@ -32,7 +32,7 @@ activities:
     image: godeltech/codereview.evaluator
     command:
     - evaluate
-    - -o
+    - --output
     - /artifacts/evaluation-result.json
     - --manifest
     - /imports/manifest.yaml

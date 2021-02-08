@@ -21,27 +21,27 @@ activities:
     image: godeltech/codereview.file-converter
     command:
     - resharper
-    - -o
+    - --output
     - /artifacts/resharper-result.zip
-    - -f
+    - --folder
     - /artifacts/result.xml
   evaluator:
     image: godeltech/codereview.evaluator
     command:
     - evaluate
-    - -o
+    - --output
     - /artifacts/evaluation-result.json
-    - -m
+    - --manifest
     - /imports/manifest.yaml
-    - -f
+    - --folder
     - /artifacts/resharper-result.zip
   templater:
     image: godeltech/codereview.template-renderer
     command:
     - evaluate
-    - -o
+    - --output
     - /artifacts/result.txt
-    - -t
+    - --template
     - /imports/template.liquid
-    - -d
+    - --data
     - /artifacts/evaluation-result.json        
