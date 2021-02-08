@@ -23,11 +23,11 @@ activities:
       sources: /tmp     
     command:
     - cloc
-    - -o
+    - --output
     - /artifacts/stat-converted.cloc.json
-    - -f
+    - --file
     - /artifacts/stat.cloc.json
-    - -p
+    - --prefix
     - ./
   roslyn:
     image: godeltech/codereview.analyzers.roslyn
@@ -39,21 +39,21 @@ activities:
     image: godeltech/codereview.file-converter
     command:
     - roslyn
-    - -o
+    - --output
     - /artifacts/rolsyn-result.zip
-    - -f
+    - --folder
     - /artifacts
-    - -s
+    - --src
     - /src/
-    - -m
+    - --mask
     - '*.roslyn.json'
   evaluator:
     image: godeltech/codereview.evaluator
     command:
     - export-db
-    - -o
+    - --output
     - /artifacts/issues.db
-    - -f
+    - --folder
     - /artifacts/rolsyn-result.zip
-    - -l
+    - --loc
     - /artifacts/stat-converted.cloc.json
