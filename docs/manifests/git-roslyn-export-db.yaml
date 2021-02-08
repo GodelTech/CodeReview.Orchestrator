@@ -1,7 +1,5 @@
 artifacts:
   exportOnCompletion: true
-variables: 
-  srcPath: /src
 activities:
   git:
     image: godeltech/codereview.tools.gitprovider
@@ -9,13 +7,34 @@ activities:
       GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
       GIT_BRANCH: main
     volumes:
-      sources: ${var.srcPath}
+      sources: /src
+  cloc:
+    image: aldanial/cloc
+    volumes:
+      sources: /tmp     
+    command:
+    - --by-file
+    - --report-file=/artifacts/stat.cloc.json
+    - --json
+    - .
+  cloc-converter:
+    image: godeltech/codereview.file-converter
+    volumes:
+      sources: /tmp     
+    command:
+    - cloc
+    - -o
+    - /artifacts/stat-converted.cloc.json
+    - -f
+    - /artifacts/stat.cloc.json
+    - -p
+    - ./
   roslyn:
     image: godeltech/codereview.analyzers.roslyn
     environment:
       SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
-      sources: ${var.srcPath}
+      sources: /src
   roslyn-converter:
     image: godeltech/codereview.file-converter
     command:
@@ -25,7 +44,7 @@ activities:
     - -f
     - /artifacts
     - -s
-    - ${var.srcPath}/
+    - /src/
     - -m
     - '*.roslyn.json'
   evaluator:
@@ -36,3 +55,5 @@ activities:
     - /artifacts/issues.db
     - -f
     - /artifacts/rolsyn-result.zip
+    - -l
+    - /artifacts/stat-converted.cloc.json
