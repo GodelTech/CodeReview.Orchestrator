@@ -31,16 +31,19 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         private async Task ValidateImageAsync(IDockerClient client, string imageName)
         {
+            // See Docker REST API for more details https://docs.docker.com/engine/api/v1.41/#operation/ImageList
             var imageListParams = new ImagesListParameters
             {
-                MatchName = imageName
+                Filters = new Dictionary<string, IDictionary<string, bool>>
+                {
+                    ["reference"] = new Dictionary<string, bool>
+                    {
+                        [imageName] = true
+                    }
+                }
             };
-            // Due to some reasons this method ignores match by image name and returns list of all registered images. Thus it's necessary to perform manual lookup.
             var matches = await client.Images.ListImagesAsync(imageListParams);
-            var found = false;
-            if (matches != null && matches.Count > 0)
-                found = matches.Any(m => m.RepoDigests != null && m.RepoDigests.Any(d => d.StartsWith(imageName)));
-            if (!found)
+            if (!matches.Any())
                 await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
         }
 
