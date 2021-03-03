@@ -17,5 +17,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         Task WaitContainer(string containerId, long waitTimeoutSeconds = 900);
         Task ExportFilesFromContainerAsync(string containerId, string containerPath, Stream outStream);
         Task ImportFilesIntoContainerAsync(string containerId, string containerPath, Stream inStream);
+        Task EnsureImageDownloadedAsync(string imageName);
     }
 }

@@ -29,8 +29,13 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
         }
 
-        private async Task ValidateImageAsync(IDockerClient client, string imageName)
+        public async Task EnsureImageDownloadedAsync(string imageName)
         {
+            if (string.IsNullOrWhiteSpace(imageName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
+            
+            using var client = _dockerClientFactory.Create();
+
             // See Docker REST API for more details https://docs.docker.com/engine/api/v1.41/#operation/ImageList
             var imageListParams = new ImagesListParameters
             {
@@ -42,6 +47,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     }
                 }
             };
+            
             var matches = await client.Images.ListImagesAsync(imageListParams);
             if (!matches.Any())
                 await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
@@ -70,8 +76,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 .ToArray();
 
             using var client = _dockerClientFactory.Create();
-
-            await ValidateImageAsync(client, imageName);
 
             var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
             {

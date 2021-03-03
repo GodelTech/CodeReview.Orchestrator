@@ -62,7 +62,7 @@ namespace GodelTech.CodeReview.Orchestrator
 
         private static async Task<int> ProcessRunAsync(RunOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options.File);
+            return await container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options);
         }
 
         private static ServiceProvider CreateServiceProvider()
@@ -83,6 +83,7 @@ namespace GodelTech.CodeReview.Orchestrator
 
             serviceProvider.AddSingleton<IVariableExpressionProvider, VariableExpressionProvider>();
 
+            serviceProvider.AddTransient<IDockerImageLoader, DockerImageLoader>();
             serviceProvider.AddTransient<ITarArchiveService, TarArchiveService>();
             serviceProvider.AddTransient<IEnvironmentVariableValueProvider, EnvironmentVariableValueProvider>();
             serviceProvider.AddTransient<IExpressionEvaluator, ExpressionEvaluator>();
