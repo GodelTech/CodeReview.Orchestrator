@@ -9,5 +9,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         string ArtifactsVolumeId { get; }
         string ImportsVolumeId { get; }
         Task InitializeAsync();
+
+        string ResolvePath(string relativeOrAbsolutePath);
     }
 }

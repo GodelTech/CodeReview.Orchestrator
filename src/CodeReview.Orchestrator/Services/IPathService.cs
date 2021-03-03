@@ -5,5 +5,6 @@
         string GetDirectoryName(string path);
         string GetFullPath(string path);
         string Combine(params string[] parts);
+        bool IsPathRooted(string path);
     }
 }

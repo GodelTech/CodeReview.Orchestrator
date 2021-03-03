@@ -11,6 +11,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
     {
         private readonly IActivityFactory _activityFactory;
         private readonly IProcessingContextFactory _processingContextFactory;
+        private readonly IPathService _pathService;
 
         public RunAnalysisCommand(
             IAnalysisManifestProvider analysisManifestProvider,
@@ -18,11 +19,13 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
             IManifestExpressionExpander manifestExpressionExpander,
             IActivityFactory activityFactory,
             IProcessingContextFactory processingContextFactory,
+            IPathService pathService,
             ILogger<AnalysisRunnerBase> logger)
             : base(analysisManifestProvider, manifestValidator, manifestExpressionExpander, logger)
         {
             _activityFactory = activityFactory ?? throw new ArgumentNullException(nameof(activityFactory));
             _processingContextFactory = processingContextFactory ?? throw new ArgumentNullException(nameof(processingContextFactory));
+            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
 
         public async Task<int> ExecuteAsync(string manifestPath)
@@ -36,7 +39,8 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
             
             Logger.LogInformation("Preparing Docker Volumes...");
 
-            await using var context = _processingContextFactory.Create();
+            await using var context = _processingContextFactory.Create(
+                _pathService.GetFullPath(manifestPath));
             
             await context.InitializeAsync();
             Logger.LogInformation("Docker Volumes created");
