@@ -12,6 +12,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class ContainerService : IContainerService
     {
+        private class NullProgress: IProgress<JSONMessage>
+        {
+            public void Report(JSONMessage value) {
+            }
+        }
+
         private readonly IDockerClientFactory _dockerClientFactory;
         private readonly INameFactory _nameFactory;
 
@@ -21,6 +27,21 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             _dockerClientFactory = dockerClientFactory ?? throw new ArgumentNullException(nameof(dockerClientFactory));
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
+        }
+
+        private async Task ValidateImageAsync(IDockerClient client, string imageName)
+        {
+            var imageListParams = new ImagesListParameters
+            {
+                MatchName = imageName
+            };
+            // Due to some reasons this method ignores match by image name and returns list of all registered images. Thus it's necessary to perform manual lookup.
+            var matches = await client.Images.ListImagesAsync(imageListParams);
+            var found = false;
+            if (matches != null && matches.Count > 0)
+                found = matches.Any(m => m.RepoDigests != null && m.RepoDigests.Any(d => d.StartsWith(imageName)));
+            if (!found)
+                await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
         }
 
         public async Task<string> CreateContainerAsync(
@@ -46,7 +67,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 .ToArray();
 
             using var client = _dockerClientFactory.Create();
-            
+
+            await ValidateImageAsync(client, imageName);
+
             var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = imageName,
