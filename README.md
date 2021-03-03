@@ -17,4 +17,8 @@ docker image tag godeltech/codereview.orchestrator:0.0.1 godeltech/codereview.or
 docker push godeltech/codereview.orchestrator:latest
 docker push godeltech/codereview.orchestrator:0.0.1
 
+
+
+docker run -v "/var/run/docker.sock:/var/run/docker.sock" -v "/mnt/d/_Tests/temp/manifests/manifest.yaml:/app/manifest.yaml" -v "/mnt/d/_Tests/temp/artifacts:/app/artifacts"   --rm godeltech/codereview.orchestrator run -f manifest.yaml
+
 ```
