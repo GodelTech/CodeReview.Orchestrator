@@ -25,6 +25,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (manifest == null) 
                 throw new ArgumentNullException(nameof(manifest));
 
+            if (behavior == ImageLoadBehavior.None)
+                return;
+            
             var imagesToDownload = manifest.Activities.Select(x => x.Value.Image)
                 .Concat(new [] { Constants.WorkerImage })
                 .Distinct()
@@ -34,8 +37,17 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             {
                 _logger.LogInformation("Validating image exists... Image = {imageName}", image);
 
-                await _containerService.EnsureImageDownloadedAsync(image);
-                
+                if (behavior == ImageLoadBehavior.LoadIfMissing)
+                {
+                    var imageExists = await _containerService.ImageExists(image);
+                    if (!imageExists)
+                        await _containerService.PullImageAsync(image);
+                }
+                else
+                {
+                    await _containerService.PullImageAsync(image);
+                }
+
                 _logger.LogInformation("Image validated");
             }
         }

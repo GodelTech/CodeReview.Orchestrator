@@ -29,7 +29,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
         }
 
-        public async Task EnsureImageDownloadedAsync(string imageName)
+        public async Task<bool> ImageExists(string imageName)
         {
             if (string.IsNullOrWhiteSpace(imageName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
@@ -49,8 +49,18 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             };
             
             var matches = await client.Images.ListImagesAsync(imageListParams);
-            if (!matches.Any())
-                await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
+            
+            return matches.Any();
+        }
+
+        public async Task PullImageAsync(string imageName)
+        {
+            if (string.IsNullOrWhiteSpace(imageName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
+            
+            using var client = _dockerClientFactory.Create();
+
+            await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
         }
 
         public async Task<string> CreateContainerAsync(
