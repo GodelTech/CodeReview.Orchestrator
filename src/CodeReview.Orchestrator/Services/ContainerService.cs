@@ -29,19 +29,53 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
         }
 
-        private async Task ValidateImageAsync(IDockerClient client, string imageName)
+        public async Task<bool> ImageExists(string imageName)
         {
+            if (string.IsNullOrWhiteSpace(imageName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
+            
+            using var client = _dockerClientFactory.Create();
+
+            // See Docker REST API for more details https://docs.docker.com/engine/api/v1.41/#operation/ImageList
             var imageListParams = new ImagesListParameters
             {
-                MatchName = imageName
+                Filters = new Dictionary<string, IDictionary<string, bool>>
+                {
+                    ["reference"] = new Dictionary<string, bool>
+                    {
+                        [imageName] = true
+                    }
+                }
             };
-            // Due to some reasons this method ignores match by image name and returns list of all registered images. Thus it's necessary to perform manual lookup.
+            
             var matches = await client.Images.ListImagesAsync(imageListParams);
-            var found = false;
-            if (matches != null && matches.Count > 0)
-                found = matches.Any(m => m.RepoDigests != null && m.RepoDigests.Any(d => d.StartsWith(imageName)));
-            if (!found)
-                await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
+            
+            return matches.Any();
+        }
+
+        public async Task PullImageAsync(string imageName)
+        {
+            if (string.IsNullOrWhiteSpace(imageName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
+
+            var tag = "latest";
+            var imageWithTag = imageName;
+
+            if (imageName.Contains(":"))
+            {
+                tag = imageName.Substring(imageName.IndexOf(':') + 1);
+                imageWithTag = imageName.Substring(0, imageWithTag.IndexOf(':'));
+            }
+
+            using var client = _dockerClientFactory.Create();
+            
+            var parameters = new ImagesCreateParameters
+            {
+                FromImage = imageWithTag,
+                Tag = tag
+            };
+
+            await client.Images.CreateImageAsync(parameters, null, new NullProgress());
         }
 
         public async Task<string> CreateContainerAsync(
@@ -67,8 +101,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 .ToArray();
 
             using var client = _dockerClientFactory.Create();
-
-            await ValidateImageAsync(client, imageName);
 
             var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
             {

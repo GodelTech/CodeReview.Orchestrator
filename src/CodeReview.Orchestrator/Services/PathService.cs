@@ -4,6 +4,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class PathService : IPathService
     {
+        public bool IsPathRooted(string path)
+        {
+            return Path.IsPathRooted(path);
+        }
+
         public string GetDirectoryName(string path)
         {
             return Path.GetDirectoryName(path);

@@ -2,6 +2,6 @@
 {
     public interface IProcessingContextFactory
     {
-        IProcessingContext Create();
+        IProcessingContext Create(string manifestFilePath);
     }
 }

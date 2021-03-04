@@ -39,7 +39,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             if (context == null) 
                 throw new ArgumentNullException(nameof(context));
 
-            var folderPath = _pathService.GetFullPath(_settings.FolderPath);
+            var folderPath = context.ResolvePath(_settings.FolderPath);
             
             if (!_directoryService.Exists(folderPath))
             {

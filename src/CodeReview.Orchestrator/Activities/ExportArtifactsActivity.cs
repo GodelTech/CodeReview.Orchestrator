@@ -46,11 +46,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 return true;
             }
 
+            var folderPath = context.ResolvePath(_settings.FolderPath);
 
-            if (!_directoryService.Exists(_settings.FolderPath))
+            if (!_directoryService.Exists(folderPath))
             {
-                _logger.LogInformation("Creating directory for artifacts export. Folder = {folderPath}", _pathService.GetFullPath(_settings.FolderPath));
-                _directoryService.CreateDirectory(_settings.FolderPath);
+                _logger.LogInformation("Creating directory for artifacts export. Folder = {folderPath}", _pathService.GetFullPath(folderPath));
+                _directoryService.CreateDirectory(folderPath);
             }
 
             _logger.LogInformation("Starting artifacts export...");
@@ -74,7 +75,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
                     outStream.Position = 0;
 
-                    _tarArchiveService.Extract(outStream, _settings.FolderPath, ArtifactsFolderPath);
+                    _tarArchiveService.Extract(outStream, folderPath, ArtifactsFolderPath);
                 }
 
                 _logger.LogInformation("Artifacts export completed.");
