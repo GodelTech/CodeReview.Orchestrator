@@ -57,10 +57,25 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             if (string.IsNullOrWhiteSpace(imageName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(imageName));
-            
-            using var client = _dockerClientFactory.Create();
 
-            await client.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = imageName }, null, new NullProgress());
+            var tag = "latest";
+            var imageWithTag = imageName;
+
+            if (imageName.Contains(":"))
+            {
+                tag = imageName.Substring(imageName.IndexOf(':') + 1);
+                imageWithTag = imageName.Substring(0, imageWithTag.IndexOf(':'));
+            }
+
+            using var client = _dockerClientFactory.Create();
+            
+            var parameters = new ImagesCreateParameters
+            {
+                FromImage = imageWithTag,
+                Tag = tag
+            };
+
+            await client.Images.CreateImageAsync(parameters, null, new NullProgress());
         }
 
         public async Task<string> CreateContainerAsync(
