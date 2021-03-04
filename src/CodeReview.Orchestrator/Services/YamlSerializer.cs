@@ -13,6 +13,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
                 .Build();
 
             return deserializer.Deserialize<T>(content);
@@ -22,6 +23,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             if (person == null) 
                 throw new ArgumentNullException(nameof(person));
+
 
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
