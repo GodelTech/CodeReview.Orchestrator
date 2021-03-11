@@ -1,14 +1,14 @@
 {
   "profiles": {
-    "ReviewItEasy.Orchestrator - ReSharper": {
+    "CodeReview.Orchestrator - ReSharper": {
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-resharper-converter.yaml"
     },
-    "ReviewItEasy.Orchestrator - Roslyn": {
+    "CodeReview.Orchestrator - Roslyn": {
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-converter.yaml"
     },
-    "ReviewItEasy.Orchestrator - Export": {
+    "CodeReview.Orchestrator - Export": {
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-export-db.yaml"
     }
