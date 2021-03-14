@@ -1,24 +1,31 @@
 # CodeReview.Orchestrator
-Code review orchestration tool
 
-```bash
+#### new
+Generating new skeleton manifest file
+<pre>
+> dotnet CodeReview.Orchestrator.dll new -o manifest.yml
+</pre>
+| Agruments     | Key       | Required                          | Type      | Description agrument      |
+| ------------- | --------- | --------------------------------- | --------- | ------------------------- |
+| --output      | -o        | true                              | string    | Path to output file       |
 
-dotnet pack CodeReview.Orchestrator.sln
-dotnet nuget push GodelTech.CodeReview.Orchestrator.0.0.1.nupkg -k XXXXX -s https://api.nuget.org/v3/index.json
+#### run
+Creating container and import files into
+<pre>
+> dotnet CodeReview.Orchestrator.dll run -f manifest.yml -b LoadLatest -e true
+</pre>
+| Agruments     | Key       | Required                          | Type      | Description agrument      |
+| ------------- | --------- | --------------------------------- | --------- | ------------------------- |
+| --file        | -f        | true                              | string    | Path to workflow file     |
+| --behavior    | -b        | false; LoadIfMissing by default   | enum: None, LoadIfMissing, LoadLatest |Defines behavior of Docker Image loading  |
+| --exit        | -e        | false;  false by defalut          | bool      |Terminates execution of program after Docker Images are downloaded   |
 
-```
-
-Docker
-
-```bash
-
-docker build -t godeltech/codereview.orchestrator:0.0.1 -f src/CodeReview.Orchestrator/Dockerfile ./src
-docker image tag godeltech/codereview.orchestrator:0.0.1 godeltech/codereview.orchestrator:latest
-docker push godeltech/codereview.orchestrator:latest
-docker push godeltech/codereview.orchestrator:0.0.1
-
-
-
-docker run -v "/var/run/docker.sock:/var/run/docker.sock" -v "/mnt/d/_Tests/temp/manifests/manifest.yaml:/app/manifest.yaml" -v "/mnt/d/_Tests/temp/artifacts:/app/artifacts"   --rm godeltech/codereview.orchestrator run -f manifest.yaml
-
-```
+#### eval
+Validating manifest file
+<pre>
+> dotnet CodeReview.Orchestrator.dll eval -f manifest.yml -o output.txt
+</pre>
+| Agruments     | Key       | Required                          | Type      | Description agrument      |
+| ------------- | --------- | --------------------------------- | --------- | ------------------------- |
+| --file        | -f        | true                              | string    | Path to workflow file     |
+| --output      | -o        | true                              | string    | Path to output file       |
