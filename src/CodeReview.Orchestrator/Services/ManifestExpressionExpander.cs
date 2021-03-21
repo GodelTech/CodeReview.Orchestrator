@@ -23,8 +23,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             _variableExpressionProvider.SetVariables(manifest.Variables);
 
+            manifest.Sources.FolderPath = _expressionEvaluator.Evaluate(manifest.Sources.FolderPath);
             manifest.Artifacts.FolderPath = _expressionEvaluator.Evaluate(manifest.Artifacts.FolderPath);
-
             manifest.Imports.FolderPath = _expressionEvaluator.Evaluate(manifest.Imports.FolderPath);
             
             manifest.Variables = manifest.Variables.ToDictionary(x => x.Key, x => _expressionEvaluator.Evaluate(x.Value), StringComparer.OrdinalIgnoreCase);

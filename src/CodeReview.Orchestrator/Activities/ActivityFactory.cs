@@ -41,8 +41,13 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     _containerService,
                     _archiveService,
                     _directoryService,
-                    _pathService,
                     _loggerFactory.CreateLogger<ImportDataActivity>()),
+                new ImportSourcesActivity(
+                    manifest.Sources,
+                    _containerService,
+                    _archiveService,
+                    _directoryService,
+                    _loggerFactory.CreateLogger<ImportSourcesActivity>()),
                 new RunProcessorsActivity(
                     manifest.Activities, 
                     _activityExecutor,
