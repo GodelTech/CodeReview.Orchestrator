@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
@@ -19,10 +17,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
-            ILogger<ImportDataActivity> logger)
+            ILogger logger)
             : base(containerService, tarArchiveService, directoryService, logger)
         {
             _settings = importedDataSettings ?? throw new ArgumentNullException(nameof(importedDataSettings));
         }
+        
+        protected override string GetVolumeToMount(IProcessingContext context) => context.ImportsVolumeId;
     }
 }

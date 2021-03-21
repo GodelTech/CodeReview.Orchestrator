@@ -17,10 +17,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
-            ILogger<ImportSourcesActivity> logger)
+            ILogger logger)
             : base(containerService, tarArchiveService, directoryService, logger)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
+        
+        protected override string GetVolumeToMount(IProcessingContext context) => context.SourceCodeVolumeId;
     }
 }

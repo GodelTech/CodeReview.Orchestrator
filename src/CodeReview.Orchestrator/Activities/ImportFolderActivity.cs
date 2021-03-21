@@ -51,7 +51,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 new MountedVolume
                 {
                     IsBindMount = false,
-                    Source = context.SourceCodeVolumeId,
+                    Source = GetVolumeToMount(context),
                     Target = ContainerFolderPath
                 });
 
@@ -70,5 +70,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
             return true;
         }
+
+        protected abstract string GetVolumeToMount(IProcessingContext context);
     }
 }
