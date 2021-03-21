@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
@@ -7,24 +7,24 @@ using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
 {
-    public class ImportDataActivity : IActivity
+    public class ImportSourcesActivity : IActivity
     {
-        private const string ImportsFolderPath = "/imports";
+        private const string SourcesFolderPath = "/src";
         
-        private readonly ImportedDataSettings _settings;
+        private readonly SourcesDataSettings _settings;
         private readonly IContainerService _containerService;
         private readonly ITarArchiveService _tarArchiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly ILogger<ImportDataActivity> _logger;
+        private readonly ILogger<ImportSourcesActivity> _logger;
 
-        public ImportDataActivity(
-            ImportedDataSettings importedDataSettings,
+        public ImportSourcesActivity(
+            SourcesDataSettings settings,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
-            ILogger<ImportDataActivity> logger)
+            ILogger<ImportSourcesActivity> logger)
         {
-            _settings = importedDataSettings ?? throw new ArgumentNullException(nameof(importedDataSettings));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _tarArchiveService = tarArchiveService ?? throw new ArgumentNullException(nameof(tarArchiveService));
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
@@ -40,11 +40,11 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             
             if (!_directoryService.Exists(folderPath))
             {
-                _logger.LogInformation("No imports folder found. Import is not performed. Folder = {folderPath}", folderPath);
+                _logger.LogInformation("No sources folder not found. Import is not performed. Folder = {folderPath}", folderPath);
                 return true;
             }
 
-            _logger.LogInformation("Starting data import...");
+            _logger.LogInformation("Starting sources import...");
 
             var containerId = await _containerService.CreateContainerAsync(
                 Constants.WorkerImage,
@@ -53,17 +53,17 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 new MountedVolume
                 {
                     IsBindMount = false,
-                    Source = context.ImportsVolumeId,
-                    Target = ImportsFolderPath
+                    Source = context.SourceCodeVolumeId,
+                    Target = SourcesFolderPath
                 });
 
             try
             {
                 await using var outStream = _tarArchiveService.Create(folderPath);
 
-                await _containerService.ImportFilesIntoContainerAsync(containerId, ImportsFolderPath, outStream);
+                await _containerService.ImportFilesIntoContainerAsync(containerId, SourcesFolderPath, outStream);
 
-                _logger.LogInformation("Data import completed.");
+                _logger.LogInformation("Sources import completed.");
             }
             finally
             {

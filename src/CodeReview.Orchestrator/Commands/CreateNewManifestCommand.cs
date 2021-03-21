@@ -28,6 +28,11 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                     FolderPath = "./imports"
                 },
                 
+                Sources = new ()
+                {
+                    FolderPath = "./src"
+                },
+                
                 Artifacts = new ()
                 {
                     FolderPath = "./artifacts",

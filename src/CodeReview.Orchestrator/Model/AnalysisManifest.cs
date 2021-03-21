@@ -8,6 +8,9 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         [Required]
         public ImportedDataSettings Imports { get; set; } = new();
 
+        [Required]
+        public SourcesDataSettings Sources { get; set; } = new();
+
         [Required] 
         public ArtifactsSettings Artifacts { get; set; } = new();
 
