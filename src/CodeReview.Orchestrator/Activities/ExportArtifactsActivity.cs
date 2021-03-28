@@ -13,6 +13,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private const string ArtifactsFolderPath = "/artifacts";
 
         private readonly ArtifactsSettings _settings;
+        private readonly IDockerEngineContext _engineContext;
         private readonly IContainerService _containerService;
         private readonly ITarArchiveService _tarArchiveService;
         private readonly IDirectoryService _directoryService;
@@ -21,6 +22,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
         public ExportArtifactsActivity(
             ArtifactsSettings importedDataSettings,
+            IDockerEngineContext engineContext,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
@@ -28,6 +30,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             ILogger<ExportArtifactsActivity> logger)
         {
             _settings = importedDataSettings ?? throw new ArgumentNullException(nameof(importedDataSettings));
+            _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _tarArchiveService = tarArchiveService ?? throw new ArgumentNullException(nameof(tarArchiveService));
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
@@ -57,7 +60,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             _logger.LogInformation("Starting artifacts export...");
 
             var containerId = await _containerService.CreateContainerAsync(
-                Constants.WorkerImage,
+                _engineContext.Engine.WorkerImage,
                 Array.Empty<string>(),
                 ImmutableDictionary<string, string>.Empty,
                 new MountedVolume

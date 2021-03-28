@@ -11,5 +11,6 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         Task InitializeAsync();
 
         string ResolvePath(string relativeOrAbsolutePath);
+        Task CleanUpVolumesAsync();
     }
 }

@@ -5,18 +5,18 @@ using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
-    public class AnalysisManifestProvider : IAnalysisManifestProvider
+    public class ManifestProvider : IManifestProvider
     {
         private readonly IYamlSerializer _yamlSerializer;
         private readonly IFileService _fileService;
         private readonly IPathService _pathService;
-        private readonly ILogger<AnalysisManifestProvider> _logger;
+        private readonly ILogger<ManifestProvider> _logger;
 
-        public AnalysisManifestProvider(
+        public ManifestProvider(
             IYamlSerializer yamlSerializer,
             IFileService fileService,
             IPathService pathService,
-            ILogger<AnalysisManifestProvider> logger)
+            ILogger<ManifestProvider> logger)
         {
             _yamlSerializer = yamlSerializer ?? throw new ArgumentNullException(nameof(yamlSerializer));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -25,7 +25,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         }
 
 
-        public async Task<AnalysisManifest> GetAsync(string path)
+        public async Task<T> GetAsync<T>(string path)
+            where T : class
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(path));
@@ -41,7 +42,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             try
             {
-                return _yamlSerializer.Deserialize<AnalysisManifest>(content);
+                return _yamlSerializer.Deserialize<T>(content);
             }
             catch (Exception ex)
             {

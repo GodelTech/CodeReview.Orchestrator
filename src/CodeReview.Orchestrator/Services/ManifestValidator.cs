@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
@@ -16,7 +15,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
-        public bool IsValid(AnalysisManifest manifest)
+        public bool IsValid(object manifest)
         {
             if (manifest == null) 
                 throw new ArgumentNullException(nameof(manifest));
@@ -31,8 +30,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 _logger.LogError("{@members}: {errorMessage}", error.MemberNames.ToArray(), error.ErrorMessage);
             }
 
-            // TODO: Validate templates used by script
-            
             return false;
         }
 

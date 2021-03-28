@@ -10,25 +10,33 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class ActivityExecutor : IActivityExecutor
     {
+        private readonly IDockerContextSwitcher _dockerContextSwitcher;
         private readonly IContainerService _containerService;
+        private readonly IDockerEngineContext _engineContext;
         private readonly ILogger<ActivityExecutor> _logger;
 
         public ActivityExecutor(
+            IDockerContextSwitcher dockerContextSwitcher,
             IContainerService containerService,
+            IDockerEngineContext engineContext,
             ILogger<ActivityExecutor> logger)
         {
+            _dockerContextSwitcher = dockerContextSwitcher ?? throw new ArgumentNullException(nameof(dockerContextSwitcher));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
-            _logger = logger;
+            _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<ExecutionResult> ExecuteAsync(
             ActivityManifest manifest,
-            bool readLogs,
-            string srcVolumeId,
-            string artifactsVolumeId,
-            string importsVolumeId)
+            bool readLogs, 
+            IProcessingContext context)
         {
-            var mounts = ResolveMountedVolumes(manifest.Volumes, srcVolumeId, artifactsVolumeId, importsVolumeId).ToArray();
+            await _dockerContextSwitcher.SwitchAsync(context, manifest.Requirements);
+            
+            _logger.LogInformation("Current Docker Engine: {engine}", _engineContext.Engine.Name);
+            
+            var mounts = ResolveMountedVolumes(manifest.Volumes, context.SourceCodeVolumeId, context.ArtifactsVolumeId, context.ImportsVolumeId).ToArray();
 
             _logger.LogInformation("Creating container. Image = {imageName}...", manifest.Image);
             var containerId = await _containerService.CreateContainerAsync(

@@ -3,8 +3,8 @@ using GodelTech.CodeReview.Orchestrator.Options;
 
 namespace GodelTech.CodeReview.Orchestrator.Commands
 {
-    public interface IValidateManifestCommand
+    public interface ICreateDockerEngineCollectionManifestCommand
     {
-        Task<int> ExecuteAsync(EvaluateOptions options);
+        Task<int> ExecuteAsync(NewDockerEngineCollectionManifestOptions options);
     }
 }

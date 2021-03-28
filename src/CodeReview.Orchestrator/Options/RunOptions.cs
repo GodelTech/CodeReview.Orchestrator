@@ -7,6 +7,9 @@ namespace GodelTech.CodeReview.Orchestrator.Options
     {
         [Option('f', "file", Required = true, HelpText = "Path to workflow file")]
         public string File { get; set; }
+        
+        [Option('d', "docker-engines", Required = false, HelpText = "Docker Engine collection file path")]
+        public string DockerEngineCollectionFilePath { get; set; }
 
         [Option('b', "behavior", Default = ImageLoadBehavior.LoadIfMissing, Required = false, HelpText = "Defines behavior of Docker Image loading")]
         public ImageLoadBehavior LoadBehavior { get; set; }

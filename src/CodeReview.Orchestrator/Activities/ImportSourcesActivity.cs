@@ -14,11 +14,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
         public ImportSourcesActivity(
             SourcesDataSettings settings,
+            IDockerEngineContext engineContext,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
             ILogger logger)
-            : base(containerService, tarArchiveService, directoryService, logger)
+            : base(engineContext, containerService, tarArchiveService, directoryService, logger)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }

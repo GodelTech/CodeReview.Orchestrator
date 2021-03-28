@@ -25,12 +25,13 @@ namespace GodelTech.CodeReview.Orchestrator
                 x.HelpWriter = TextWriter.Null;
             });
 
-            var result = parser.ParseArguments<RunOptions, NewOptions, EvaluateOptions>(args);
+            var result = parser.ParseArguments<RunOptions, NewAnalysisManifestOptions, EvaluateOptions, NewDockerEngineCollectionManifestOptions>(args);
 
             var exitCode = result
                 .MapResult(
                     (RunOptions x) => ProcessRunAsync(x, container).GetAwaiter().GetResult(),
-                    (NewOptions x) => ProcessNewAsync(x, container).GetAwaiter().GetResult(),
+                    (NewAnalysisManifestOptions x) => ProcessNewAsync(x, container).GetAwaiter().GetResult(),
+                    (NewDockerEngineCollectionManifestOptions x) => ProcessEvaluateAsync(x, container).GetAwaiter().GetResult(),
                     (EvaluateOptions x) => ProcessEvaluateAsync(x, container).GetAwaiter().GetResult(),
                     _ => ProcessErrors(result));
 
@@ -50,19 +51,24 @@ namespace GodelTech.CodeReview.Orchestrator
             return Constants.ErrorExitCode;
         }
 
-        private static async Task<int> ProcessEvaluateAsync(EvaluateOptions options, IServiceProvider container)
+        private static Task<int> ProcessEvaluateAsync(NewDockerEngineCollectionManifestOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<IValidateManifestCommand>().ExecuteAsync(options.File, options.OutputPath);
+            return container.GetRequiredService<ICreateDockerEngineCollectionManifestCommand>().ExecuteAsync(options);
         }
 
-        private static async Task<int> ProcessNewAsync(NewOptions options, IServiceProvider container)
+        private static Task<int> ProcessEvaluateAsync(EvaluateOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<ICreateNewManifestCommand>().ExecuteAsync(options.File);
+            return container.GetRequiredService<IValidateManifestCommand>().ExecuteAsync(options);
         }
 
-        private static async Task<int> ProcessRunAsync(RunOptions options, IServiceProvider container)
+        private static Task<int> ProcessNewAsync(NewAnalysisManifestOptions options, IServiceProvider container)
         {
-            return await container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options);
+            return container.GetRequiredService<ICreateManifestCommand>().ExecuteAsync(options);
+        }
+
+        private static Task<int> ProcessRunAsync(RunOptions options, IServiceProvider container)
+        {
+            return container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options);
         }
 
         private static ServiceProvider CreateServiceProvider()
@@ -81,13 +87,18 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddSingleton<IPathService, PathService>();
             serviceProvider.AddSingleton<IDirectoryService, DirectoryService>();
 
+            serviceProvider.AddSingleton<IDockerEngineProvider, DockerEngineProvider>();
+            serviceProvider.AddSingleton<IDockerEngineContext, DockerEngineContext>();
             serviceProvider.AddSingleton<IVariableExpressionProvider, VariableExpressionProvider>();
-
+            serviceProvider.AddSingleton<IGuidFactory, GuidFactory>();
+            
+            serviceProvider.AddTransient<ITempFolderFactory, TempFolderFactory>();
+            serviceProvider.AddTransient<IDockerContextSwitcher, DockerContextSwitcher>();
             serviceProvider.AddTransient<IDockerImageLoader, DockerImageLoader>();
             serviceProvider.AddTransient<ITarArchiveService, TarArchiveService>();
             serviceProvider.AddTransient<IEnvironmentVariableValueProvider, EnvironmentVariableValueProvider>();
             serviceProvider.AddTransient<IExpressionEvaluator, ExpressionEvaluator>();
-            serviceProvider.AddTransient<IAnalysisManifestProvider, AnalysisManifestProvider>();
+            serviceProvider.AddTransient<IManifestProvider, ManifestProvider>();
             serviceProvider.AddTransient<IActivityExecutor, ActivityExecutor>();
             serviceProvider.AddTransient<IActivityFactory, ActivityFactory>();
             serviceProvider.AddTransient<IProcessingContextFactory, ProcessingContextFactory>();
@@ -96,8 +107,9 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddTransient<IManifestValidator, ManifestValidator>();
             serviceProvider.AddTransient<IManifestExpressionExpander, ManifestExpressionExpander>();
             serviceProvider.AddTransient<IRunAnalysisCommand, RunAnalysisCommand>();
-            serviceProvider.AddTransient<ICreateNewManifestCommand, CreateNewManifestCommand>();
+            serviceProvider.AddTransient<ICreateManifestCommand, CreateManifestCommand>();
             serviceProvider.AddTransient<IValidateManifestCommand, ValidateManifestCommand>();
+            serviceProvider.AddTransient<ICreateDockerEngineCollectionManifestCommand, CreateDockerEngineCollectionManifestCommand>();
             serviceProvider.AddTransient<IOutputFolderPathCalculator, OutputFolderPathCalculator>();
 
             return serviceProvider.BuildServiceProvider();

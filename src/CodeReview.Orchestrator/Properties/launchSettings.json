@@ -8,6 +8,10 @@
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-converter.yaml"
     },
+    "CodeReview.Orchestrator - Roslyn with Docker Engines": {
+      "commandName": "Project",
+      "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-converter.yaml -d ../../../../../docs/manifests/engines.yaml"
+    },
     "CodeReview.Orchestrator - Export": {
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-roslyn-export-db.yaml"

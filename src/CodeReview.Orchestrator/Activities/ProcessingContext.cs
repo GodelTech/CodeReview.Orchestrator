@@ -48,7 +48,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             return  _pathService.GetFullPath(importsFolderPath);
         }
 
-        public async ValueTask DisposeAsync()
+        public async Task CleanUpVolumesAsync()
         {
             if (!string.IsNullOrEmpty(SourceCodeVolumeId))
                 await _containerService.RemoveVolumeAsync(SourceCodeVolumeId);
@@ -58,6 +58,15 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
             if (!string.IsNullOrEmpty(ImportsVolumeId))
                 await _containerService.RemoveVolumeAsync(ImportsVolumeId);
+
+            SourceCodeVolumeId = null;
+            ArtifactsVolumeId = null;
+            ImportsVolumeId = null;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await CleanUpVolumesAsync();
         }
     }
 }

@@ -18,6 +18,9 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         [Required]
         public ActivitySettings Settings { get; set; } = new();
 
+        [Required]
+        public RequirementsManifest Requirements { get; set; } = new();
+
         public string[] Command { get; set; }
     }
 }

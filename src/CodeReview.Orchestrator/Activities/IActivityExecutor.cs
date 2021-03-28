@@ -5,6 +5,6 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public interface IActivityExecutor
     {
-        Task<ExecutionResult> ExecuteAsync(ActivityManifest manifest, bool readLogs, string srcVolumeId, string artifactsVolumeId, string importsVolumeId);
+        Task<ExecutionResult> ExecuteAsync(ActivityManifest manifest, bool readLogs, IProcessingContext context);
     }
 }

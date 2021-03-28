@@ -6,5 +6,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
     {
         bool Exists(string path);
         DirectoryInfo CreateDirectory(string path);
+        void Delete(string path, bool recursive);
     }
 }
