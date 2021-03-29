@@ -1,0 +1,35 @@
+trigger:
+  - main
+
+resources:
+  - repo: self
+
+variables:
+  repository: 'godeltech/codereview.orchestrator'
+  foldername: 'CodeReview.Orchestrator'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+          - task: gitversion/setup@0
+            displayName: Setup GitVersion
+            inputs:
+             versionSpec: '5.x'
+          - script: pwd && ls
+          - task: gitversion/execute@0
+            displayName: Execute GitVersion
+          - task: Docker@2
+            displayName: Build and Push an image
+            inputs:
+              buildContext: './src/'
+              containerRegistry: 'docker-hub'
+              repository: $(repository)
+              command: 'buildAndPush'
+              Dockerfile: './src/$(foldername)/Dockerfile'
+              tags: |
+                $(Build.BuildNumber)
+                latest
