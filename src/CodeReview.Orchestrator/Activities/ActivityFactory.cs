@@ -7,6 +7,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class ActivityFactory : IActivityFactory
     {
+        private readonly IDockerEngineContext _engineContext;
         private readonly IContainerService _containerService;
         private readonly IActivityExecutor _activityExecutor;
         private readonly ITarArchiveService _archiveService;
@@ -15,6 +16,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly ILoggerFactory _loggerFactory;
 
         public ActivityFactory(
+            IDockerEngineContext engineContext,
             IContainerService containerService,
             IActivityExecutor activityExecutor,
             ITarArchiveService archiveService,
@@ -22,6 +24,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             IPathService pathService,
             ILoggerFactory loggerFactory)
         {
+            _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _activityExecutor = activityExecutor ?? throw new ArgumentNullException(nameof(activityExecutor));
             _archiveService = archiveService ?? throw new ArgumentNullException(nameof(archiveService));
@@ -38,12 +41,14 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             return new CompositeActivity(
                 new ImportDataActivity(
                     manifest.Imports,
+                    _engineContext,
                     _containerService,
                     _archiveService,
                     _directoryService,
                     _loggerFactory.CreateLogger<ImportDataActivity>()),
                 new ImportSourcesActivity(
                     manifest.Sources,
+                    _engineContext,
                     _containerService,
                     _archiveService,
                     _directoryService,
@@ -54,6 +59,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     _loggerFactory.CreateLogger<RunProcessorsActivity>()),
                 new ExportArtifactsActivity(
                     manifest.Artifacts,
+                    _engineContext,
                     _containerService,
                     _archiveService,
                     _directoryService,

@@ -9,6 +9,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public abstract class ImportFolderActivity : IActivity
     {
+        private readonly IDockerEngineContext _engineContext;
         private readonly IContainerService _containerService;
         private readonly ITarArchiveService _tarArchiveService;
         private readonly IDirectoryService _directoryService;
@@ -18,11 +19,13 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         protected abstract string HostFolderPath { get; }
 
         protected ImportFolderActivity(
+            IDockerEngineContext engineContext,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
             ILogger logger)
         {
+            _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _tarArchiveService = tarArchiveService ?? throw new ArgumentNullException(nameof(tarArchiveService));
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
@@ -45,7 +48,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             _logger.LogInformation("Starting sources import...");
 
             var containerId = await _containerService.CreateContainerAsync(
-                Constants.WorkerImage,
+                _engineContext.Engine.WorkerImage,
                 Array.Empty<string>(),
                 ImmutableDictionary<string, string>.Empty,
                 new MountedVolume

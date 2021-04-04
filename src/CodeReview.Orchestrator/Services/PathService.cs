@@ -9,6 +9,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             return Path.IsPathRooted(path);
         }
 
+        public string GetTempPath()
+        {
+            return Path.GetTempPath();
+        }
+
         public string GetDirectoryName(string path)
         {
             return Path.GetDirectoryName(path);

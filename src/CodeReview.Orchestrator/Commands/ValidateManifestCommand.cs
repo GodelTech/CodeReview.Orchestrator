@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
+using GodelTech.CodeReview.Orchestrator.Options;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
         private readonly IYamlSerializer _yamlSerializer;
 
         public ValidateManifestCommand(
-            IAnalysisManifestProvider analysisManifestProvider,
+            IManifestProvider analysisManifestProvider,
             IManifestValidator manifestValidator,
             IManifestExpressionExpander manifestExpressionExpander,
             IFileService fileService,
@@ -24,18 +25,20 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
             _yamlSerializer = yamlSerializer ?? throw new ArgumentNullException(nameof(yamlSerializer));
         }
 
-        public async Task<int> ExecuteAsync(string manifestPath, string outputFilePath)
+        public async Task<int> ExecuteAsync(EvaluateOptions options)
         {
-            if (string.IsNullOrWhiteSpace(manifestPath))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(manifestPath));
+            if (options == null) 
+                throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrWhiteSpace(options.File))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(options.File));
 
-            var manifest = await GetManifestAsync(manifestPath);
+            var manifest = await GetManifestAsync(options.File);
             if (manifest == null)
                 return Constants.ErrorExitCode;
 
             var yaml = _yamlSerializer.Serialize(manifest);
 
-            await _fileService.WriteAllTextAsync(outputFilePath, yaml);
+            await _fileService.WriteAllTextAsync(options.OutputPath, yaml);
 
             return Constants.SuccessExitCode;
         }

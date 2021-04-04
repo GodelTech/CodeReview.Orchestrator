@@ -2,8 +2,6 @@
 {
     internal static class Constants
     {
-        public const string WorkerImage = "alpine";
-        
         public const int SuccessExitCode = 0;
         public const int ErrorExitCode = -1;
         

@@ -7,13 +7,13 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public abstract class AnalysisRunnerBase
     {
-        protected IAnalysisManifestProvider AnalysisManifestProvider { get; }
+        protected IManifestProvider AnalysisManifestProvider { get; }
         protected IManifestValidator ManifestValidator { get; }
         protected IManifestExpressionExpander ManifestExpressionExpander { get; }
         protected ILogger<AnalysisRunnerBase> Logger { get; }
 
         protected AnalysisRunnerBase(
-            IAnalysisManifestProvider analysisManifestProvider,
+            IManifestProvider analysisManifestProvider,
             IManifestValidator manifestValidator,
             IManifestExpressionExpander manifestExpressionExpander,
             ILogger<AnalysisRunnerBase> logger)
@@ -31,7 +31,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             Logger.LogInformation("Reading and deserializing manifest...");
 
-            var manifest = await AnalysisManifestProvider.GetAsync(manifestPath);
+            var manifest = await AnalysisManifestProvider.GetAsync<AnalysisManifest>(manifestPath);
             if (manifest == null)
             {
                 Logger.LogError("Failed to read manifest");

@@ -36,9 +36,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     var result = await _activityExecutor.ExecuteAsync(
                         manifest,
                         true,
-                        context.SourceCodeVolumeId,
-                        context.ArtifactsVolumeId,
-                        context.ImportsVolumeId);
+                        context);
 
                     if (result.ExitCode != Constants.SuccessExitCode)
                         return false;
