@@ -1,0 +1,12 @@
+﻿artifacts:
+  exportOnCompletion: true
+variables:
+  srcPath: /src
+activities:
+  git:
+    image: godeltech/codereview.tools.gitprovider
+    environment:
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
+    volumes:
+      sources: ${var.srcPath}

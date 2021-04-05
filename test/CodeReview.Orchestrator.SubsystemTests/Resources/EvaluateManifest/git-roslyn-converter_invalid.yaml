@@ -1,0 +1,47 @@
+artifacts:
+  exportOnCompletion: false true
+variables:
+  srcPath: /src
+activities:
+  git:
+    image: godeltech/codereview.tools.gitprovider
+    environment:
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
+    volumes:
+      sources: ${var.srcPath}
+  resharper:
+    image: godeltech/codereview.analyzers.inspectcode
+    environment:
+      SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
+    volumes:
+      sources: ${var.srcPath}
+      artifacts: /artifacts
+  resharper-converter:
+    image: godeltech/codereview.file-converter
+    command:
+      - resharper
+      - --output
+      - /artifacts/resharper-result.zip
+      - --folder
+      - /artifacts/result.xml
+  evaluator:
+    image: godeltech/codereview.evaluator
+    command:
+      - evaluate
+      - --output
+      - /artifacts/evaluation-result.json
+      - --manifest
+      - /imports/manifest.yaml
+      - --folder
+      - /artifacts/resharper-result.zip
+  templater:
+    image: godeltech/codereview.template-renderer
+    command:
+      - evaluate
+      - --output
+      - /artifacts/result.txt
+      - --template
+      - /imports/template.liquid
+      - --data
+      - /artifacts/evaluation-result.json        

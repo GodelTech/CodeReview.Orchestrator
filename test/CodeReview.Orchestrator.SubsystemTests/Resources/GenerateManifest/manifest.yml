@@ -1,0 +1,66 @@
+imports:
+  folderPath: ./imports
+sources:
+  folderPath: ./src
+artifacts:
+  folderPath: ./artifacts
+  exportOnCompletion: true
+variables:
+  MY_VAR_1: Value1
+  MY_VAR_2: Value2
+activities:
+  git:
+    image: dragon/jetbrains
+    environment:
+      MY_VAR_1: Value1
+      MY_VAR_2: Value2
+    volumes:
+      useWindowsDefaults: false
+      sources: /src
+      artifacts: /artifacts
+      imports: /imports
+    settings:
+      waitTimeoutSeconds: 3000
+    requirements:
+      os: Linux
+      features:
+      - feature1
+    command:
+    - mkdir
+    - /mydir
+  resharper:
+    image: dragon/jetbrains
+    environment:
+      MY_VAR_1: Value1
+      MY_VAR_2: Value2
+    volumes:
+      useWindowsDefaults: false
+      sources: /src
+      artifacts: /artifacts
+      imports: /imports
+    settings:
+      waitTimeoutSeconds: 3000
+    requirements:
+      os: Windows
+      features:
+      - feature2
+      - feature3
+    command:
+    - mkdir
+    - /mydir
+  roslyn:
+    image: dragon/roslyn
+    environment:
+      MY_VAR_1: Value1
+      MY_VAR_2: Value2
+    volumes:
+      useWindowsDefaults: true
+      sources: C:\src
+      artifacts: C:\artifacts
+      imports: C:\imports
+    settings:
+      waitTimeoutSeconds: 3000
+    requirements: 
+    command:
+    - mkdir
+    - /mydir
