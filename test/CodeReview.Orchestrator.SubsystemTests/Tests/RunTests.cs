@@ -160,9 +160,9 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
             var srcFilePath = Path.Combine("src", srcOutputName);
             var importFilePath = Path.Combine("imports", srcOutputName);
             
-            var srcVolumeId = $"src-{Guid.NewGuid().ToString()}";
-            var artVolumeId = $"art-{Guid.NewGuid().ToString()}";
-            var impVolumeId = $"imp-{Guid.NewGuid().ToString()}";
+            var srcVolumeId = $"src-{Guid.NewGuid()}";
+            var artVolumeId = $"art-{Guid.NewGuid()}";
+            var impVolumeId = $"imp-{Guid.NewGuid()}";
             
             Scenario.New()
                 .Given()
@@ -180,8 +180,8 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .HasPerformed<StubDockerImportSourceActivity>(m => m.WithImage(AlpineImage).WithSourceId(srcVolumeId))
                 
                     .HasPerformed<StubDockerContainerGitActivity>(m => m
-                        .WithEnv("GIT_REPOSITORY_URL=https://github.com/GodelTech/CodeReview.Orchestrator.git")
-                        .WithEnv("GIT_BRANCH=main")
+                        .WithEnv("GIT_REPOSITORY_URL", "https://github.com/GodelTech/CodeReview.Orchestrator.git")
+                        .WithEnv("GIT_BRANCH", "main")
                         .WithImage(GitProviderImage)
                         .WithArtVolumeId(artVolumeId)
                         .WithImpVolumeId(impVolumeId)

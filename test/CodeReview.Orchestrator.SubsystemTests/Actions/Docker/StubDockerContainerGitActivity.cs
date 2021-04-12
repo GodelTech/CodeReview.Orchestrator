@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GodelTech.StoryLine.Contracts;
 
 namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
 {
     public class StubDockerContainerGitActivity : IActionBuilder
     {
-        private readonly List<string> _envs = new();
+        private readonly Dictionary<string, string> _envVariables = new();
         
         private string _srcVolumeId;
         private string _artVolumeId;
@@ -41,11 +42,11 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
             return this;
         }
 
-        public StubDockerContainerGitActivity WithEnv(string env)
+        public StubDockerContainerGitActivity WithEnv(string variableName, string value)
         {
-            if (env is null) throw new ArgumentNullException(nameof(env));
+            if (variableName is null) throw new ArgumentNullException(nameof(variableName));
 
-            _envs.Add(env);
+            _envVariables[variableName] = value;
             
             return this;
         }
@@ -54,7 +55,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
         {
             return new StubDockerContainerActivityAction
             {
-                Envs = _envs,
+                Envs = _envVariables.Select(p => $"{p.Key}={p.Value}").ToList(),
                 SrcVolumeId = _srcVolumeId,
                 ArtVolumeId = _artVolumeId,
                 ImpVolumeId = _impVolumeId,
