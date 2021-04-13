@@ -7,6 +7,7 @@ resources:
 variables:
   repository: 'godeltech/codereview.orchestrator'
   srcName: 'CodeReview.Orchestrator'
+  wiremockImage: ''
   unitTestsName: 'CodeReview.Orchestrator.Tests'
   subsysTestsName: 'CodeReview.Orchestrator.SubsystemTests'
   buildConfiguration: 'Release'
@@ -22,7 +23,9 @@ stages:
             displayName: Setup GitVersion
             inputs:
               versionSpec: '5.x'
+
           - script: pwd && ls
+
           - task: gitversion/execute@0
             displayName: Execute GitVersion
 
@@ -33,6 +36,16 @@ stages:
               projects: './src/$(srcName)/$(srcName).csproj'
               arguments: '-c $(buildConfiguration)'
 
+  - job: Subsystem
+    displayName: Subsystem tests
+    steps:
+          - task: DockerInstaller@0
+            inputs:
+              dockerVersion: '17.09.0-ce'
+
+          - script: docker pull rodolpheche/wiremock
+          - script: docker run -it --name rodolpheche-wiremock-container --rm -p 19257:19257 rodolpheche/wiremock
+
           - task: DotNetCoreCLI@2
             displayName: Run subsystem tests
             inputs:
@@ -41,6 +54,16 @@ stages:
               arguments: '-c $(buildConfiguration)'
               testRunTitle: 'Subsystem tests'
 
+  - job: SubsystemCleanup
+    displayName: Subsystem cleanup
+    dependsOn: Subsystem
+    condition: always()
+    steps:
+      - script: docker rm -f rodolpheche-wiremock-container
+
+  - job: Publish
+    displayName: Publish an image
+    steps:
           - task: Docker@2
             displayName: Build and Push an image
             inputs:
