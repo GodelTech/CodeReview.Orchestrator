@@ -1,0 +1,6 @@
+defaultEngine: default
+engines:
+  default:
+    os: Linux
+    url: http://localhost:19257/
+    workerImage: alpine

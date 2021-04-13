@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+       <PackageReference Include="GodelTech.StoryLine.Wiremock" Version="0.0.1" />
+       <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+       <PackageReference Include="xunit" Version="2.4.1" />
+       <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+      <PackageReference Include="GodelTech.StoryLine" Version="1.0.0" />
+      <PackageReference Include="GodelTech.StoryLine.Rest" Version="1.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\EvaluateManifest\eval_output.txt" />
+      <EmbeddedResource Include="Resources\EvaluateManifest\git-roslyn-converter.yaml" />
+      <EmbeddedResource Include="Resources\EvaluateManifest\git-roslyn-converter_invalid.yaml" />
+      <EmbeddedResource Include="Resources\GenerateDockerEngine\docker-engines.yml" />
+      <EmbeddedResource Include="Resources\GenerateManifest\manifest.yml" />
+      <EmbeddedResource Include="Resources\Run\engines.yaml" />
+      <EmbeddedResource Include="Resources\Run\git-roslyn-converter.yaml" />
+      <EmbeddedResource Include="Resources\Run\ListImagesResponse.json" />
+      <None Remove="Resources\Run\src.txt" />
+      <EmbeddedResource Include="Resources\Run\src.txt" />
+      <None Remove="Resources\Run\git_container_post_body.json" />
+      <EmbeddedResource Include="Resources\Run\git_container_post_body.json" />
+      <None Remove="Resources\Run\artifacts.zip" />
+      <EmbeddedResource Include="Resources\Run\artifacts.zip" />
+    </ItemGroup>
+
+</Project>

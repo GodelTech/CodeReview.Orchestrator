@@ -1,0 +1,27 @@
+﻿{
+  "Env": [
+    "GIT_REPOSITORY_URL=https://github.com/GodelTech/CodeReview.Orchestrator.git",
+    "GIT_BRANCH=main"
+  ],
+  "Image": "godeltech/codereview.tools.gitprovider",
+  "HostConfig": {
+    "Mounts": [
+      {
+        "Type": "volume",
+        "Source": "src-volume-id",
+        "Target": "/src"
+      },
+      {
+        "Type": "volume",
+        "Source": "art-volume-id",
+        "Target": "/artifacts"
+      },
+      {
+        "Type": "volume",
+        "Source": "imp-volume-id",
+        "Target": "/imports",
+        "ReadOnly": true
+      }
+    ]
+  }
+}

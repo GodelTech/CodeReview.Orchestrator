@@ -12,7 +12,7 @@ Generating new skeleton manifest file
 #### new-engine-collection
 Creates draft of Docker engine collection manifest.
 <pre>
-> dotnet CodeReview.Orchestrator.dll new -o docker-engines.yml
+> dotnet CodeReview.Orchestrator.dll new-engine-collection -o docker-engines.yml
 </pre>
 | Agruments     | Key       | Required  | Type      | Description agrument      |
 | ------------- | --------- | --------- | --------- | ------------------------- |

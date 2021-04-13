@@ -2,11 +2,11 @@ defaultEngine: default
 engines:
   default:
     os: Linux
-    url: http://ip172-18-0-19-c1kcf8pbqvp000b8rqr0-2375.direct.labs.play-with-docker.com/
+    url: http://ip172-18-0-70-c1m20ije75e000av0v8g-2375.direct.labs.play-with-docker.com/
     workerImage: alpine
   remote:
     os: Linux
-    url: http://ip172-18-0-31-c1kcf8pbqvp000b8rqr0-2375.direct.labs.play-with-docker.com/
+    url: http://ip172-18-0-70-c1m20ije75e000av0v8g-2375.direct.labs.play-with-docker.com/
     workerImage: alpine
     features:
     - feature1

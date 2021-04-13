@@ -1,0 +1,41 @@
+﻿imports:
+  folderPath: ./imports
+sources:
+  folderPath: ./src
+artifacts:
+  folderPath: ./artifacts
+  exportOnCompletion: true
+variables:
+  srcPath: /src
+activities:
+  git:
+    image: godeltech/codereview.tools.gitprovider
+    environment:
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
+    volumes:
+      useWindowsDefaults: false
+      sources: /src
+      artifacts: /artifacts
+      imports: /imports
+    settings:
+      waitTimeoutSeconds: 900
+    requirements:
+      os: 
+      features: &o0 []
+    command: 
+  resharper:
+    image: godeltech/codereview.analyzers.inspectcode
+    environment:
+      SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
+    volumes:
+      useWindowsDefaults: false
+      sources: /src
+      artifacts: /artifacts
+      imports: /imports
+    settings:
+      waitTimeoutSeconds: 900
+    requirements:
+      os: 
+      features: *o0
+    command: 

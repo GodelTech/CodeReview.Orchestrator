@@ -1,0 +1,23 @@
+defaultEngine: default
+engines:
+  default:
+    os: Linux
+    url: unix:///var/run/docker.sock
+    workerImage: alpine
+    features:
+    - feature1
+    - feature2
+  windows:
+    os: Windows
+    url: npipe:////./pipe/docker_engine
+    workerImage: alpine
+    features:
+    - feature1
+    - feature2
+  remote:
+    os: Windows
+    url: http://remote.api:2375/
+    workerImage: alpine
+    features:
+    - feature1
+    - feature2
