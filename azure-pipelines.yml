@@ -6,7 +6,10 @@ resources:
 
 variables:
   repository: 'godeltech/codereview.orchestrator'
-  foldername: 'CodeReview.Orchestrator'
+  srcName: 'CodeReview.Orchestrator'
+  unitTestsName: 'CodeReview.Orchestrator.Tests'
+  subsysTestsName: 'CodeReview.Orchestrator.SubsystemTests'
+  buildConfiguration: 'Release'
 
 stages:
 - stage: Build
@@ -18,10 +21,34 @@ stages:
           - task: gitversion/setup@0
             displayName: Setup GitVersion
             inputs:
-             versionSpec: '5.x'
+              versionSpec: '5.x'
           - script: pwd && ls
           - task: gitversion/execute@0
             displayName: Execute GitVersion
+
+          - task: DotNetCoreCLI@2
+            displayName: Build project
+            inputs:
+              command: 'build'
+              projects: './src/$(srcName)/$(srcName).csproj'
+              arguments: '-c $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            displayName: Run unit tests
+            inputs:
+              command: 'test'
+              projects: './test/$(unitTestsName)/$(unitTestsName).csproj'
+              arguments: '-c $(buildConfiguration)'
+              testRunTitle: 'Unit tests'
+
+          - task: DotNetCoreCLI@2
+            displayName: Run subsystem tests
+            inputs:
+              command: 'test'
+              projects: './test/$(subsysTestsName)/$(subsysTestsName).csproj'
+              arguments: '-c $(buildConfiguration)'
+              testRunTitle: 'Subsystem tests'
+
           - task: Docker@2
             displayName: Build and Push an image
             inputs:
@@ -29,7 +56,7 @@ stages:
               containerRegistry: 'docker-hub'
               repository: $(repository)
               command: 'buildAndPush'
-              Dockerfile: './src/$(foldername)/Dockerfile'
+              Dockerfile: './src/$(srcName)/Dockerfile'
               tags: |
                 $(Build.BuildNumber)
                 latest
