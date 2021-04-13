@@ -19,63 +19,48 @@ stages:
   - job: Build
     displayName: Build
     steps:
-          - task: gitversion/setup@0
-            displayName: Setup GitVersion
-            inputs:
-              versionSpec: '5.x'
+        - task: gitversion/setup@0
+          displayName: Setup GitVersion
+          inputs:
+            versionSpec: '5.x'
 
-          - script: pwd && ls
+        - script: pwd && ls
 
-          - task: gitversion/execute@0
-            displayName: Execute GitVersion
+        - task: gitversion/execute@0
+          displayName: Execute GitVersion
 
-          - task: DotNetCoreCLI@2
-            displayName: Build project
-            inputs:
-              command: 'build'
-              projects: './src/$(srcName)/$(srcName).csproj'
-              arguments: '-c $(buildConfiguration)'
+        - task: DotNetCoreCLI@2
+          displayName: Build project
+          inputs:
+            command: 'build'
+            projects: './src/$(srcName)/$(srcName).csproj'
+            arguments: '-c $(buildConfiguration)'
 
-  - job: Subsystem
-    displayName: Subsystem tests
-    dependsOn: Build
-    condition: succeeded()
-    steps:
-          - task: DockerInstaller@0
-            inputs:
-              dockerVersion: '17.09.0-ce'
+        - task: DockerInstaller@0
+          inputs:
+            dockerVersion: '17.09.0-ce'
 
-          - script: docker pull rodolpheche/wiremock
-          - script: docker run -it --name rodolpheche-wiremock-container --rm -p 19257:19257 rodolpheche/wiremock
+        - script: docker pull rodolpheche/wiremock
+        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 19257:19257 rodolpheche/wiremock
 
-          - task: DotNetCoreCLI@2
-            displayName: Run subsystem tests
-            inputs:
-              command: 'test'
-              projects: './test/$(subsysTestsName)/$(subsysTestsName).csproj'
-              arguments: '-c $(buildConfiguration)'
-              testRunTitle: 'Subsystem tests'
+        - task: DotNetCoreCLI@2
+          displayName: Run subsystem tests
+          inputs:
+            command: 'test'
+            projects: './test/$(subsysTestsName)/$(subsysTestsName).csproj'
+            arguments: '-c $(buildConfiguration)'
+            testRunTitle: 'Subsystem tests'
 
-  - job: SubsystemCleanup
-    displayName: Subsystem cleanup
-    dependsOn: Subsystem
-    condition: always()
-    steps:
-      - script: docker rm -f rodolpheche-wiremock-container
+        - script: docker rm -f rodolpheche-wiremock-container
 
-  - job: Publish
-    displayName: Publish an image
-    dependsOn: Subsystem
-    condition: succeeded()
-    steps:
-          - task: Docker@2
-            displayName: Build and Push an image
-            inputs:
-              buildContext: './src/'
-              containerRegistry: 'docker-hub'
-              repository: $(repository)
-              command: 'buildAndPush'
-              Dockerfile: './src/$(srcName)/Dockerfile'
-              tags: |
-                $(Build.BuildNumber)
+        - task: Docker@2
+          displayName: Build and Push an image
+          inputs:
+            buildContext: './src/'
+            containerRegistry: 'docker-hub'
+            repository: $(repository)
+            command: 'buildAndPush'
+            Dockerfile: './src/$(srcName)/Dockerfile'
+            tags: |
+              $(Build.BuildNumber)
                 latest
