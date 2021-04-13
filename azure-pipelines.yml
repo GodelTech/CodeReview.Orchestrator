@@ -41,7 +41,7 @@ stages:
             dockerVersion: '17.09.0-ce'
 
         - script: docker pull rodolpheche/wiremock
-        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 19257:19257 rodolpheche/wiremock
+        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 8080:8080 rodolpheche/wiremock
 
         - task: DotNetCoreCLI@2
           displayName: Run subsystem tests
