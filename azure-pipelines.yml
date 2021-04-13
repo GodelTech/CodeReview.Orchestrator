@@ -34,14 +34,6 @@ stages:
               arguments: '-c $(buildConfiguration)'
 
           - task: DotNetCoreCLI@2
-            displayName: Run unit tests
-            inputs:
-              command: 'test'
-              projects: './test/$(unitTestsName)/$(unitTestsName).csproj'
-              arguments: '-c $(buildConfiguration)'
-              testRunTitle: 'Unit tests'
-
-          - task: DotNetCoreCLI@2
             displayName: Run subsystem tests
             inputs:
               command: 'test'
