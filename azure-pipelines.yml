@@ -44,8 +44,10 @@ stages:
         - script: docker pull rodolpheche/wiremock
           displayName: Pull rodolpheche/wiremock image
 
-        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 8080:8080 rodolpheche/wiremock
+        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 19257:8080 rodolpheche/wiremock
           displayName: Run rodolpheche-wiremock-container container
+
+        - script: ls ./src/$(srcName)/bin/$(buildConfiguration)/net5.0/
 
         - task: DotNetCoreCLI@2
           displayName: Run subsystem tests
