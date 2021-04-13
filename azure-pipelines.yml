@@ -37,11 +37,15 @@ stages:
             arguments: '-c $(buildConfiguration)'
 
         - task: DockerInstaller@0
+          displayName: Install docker CLI
           inputs:
             dockerVersion: '17.09.0-ce'
 
         - script: docker pull rodolpheche/wiremock
+          displayName: Pull rodolpheche/wiremock image
+
         - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p 8080:8080 rodolpheche/wiremock
+          displayName: Run rodolpheche-wiremock-container container
 
         - task: DotNetCoreCLI@2
           displayName: Run subsystem tests
@@ -52,6 +56,7 @@ stages:
             testRunTitle: 'Subsystem tests'
 
         - script: docker rm -f rodolpheche-wiremock-container
+          displayName: Remove rodolpheche-wiremock-container container
 
         - task: Docker@2
           displayName: Build and Push an image
