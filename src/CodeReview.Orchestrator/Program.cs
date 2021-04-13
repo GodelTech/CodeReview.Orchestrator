@@ -27,6 +27,7 @@ namespace GodelTech.CodeReview.Orchestrator
 
             var result = parser.ParseArguments<RunOptions, NewAnalysisManifestOptions, EvaluateOptions, NewDockerEngineCollectionManifestOptions>(args);
 
+
             var exitCode = result
                 .MapResult(
                     (RunOptions x) => ProcessRunAsync(x, container).GetAwaiter().GetResult(),
