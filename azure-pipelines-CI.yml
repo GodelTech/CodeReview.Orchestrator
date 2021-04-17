@@ -1,0 +1,59 @@
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  srcName: 'CodeReview.Orchestrator'
+  wiremockPort: '19257:8080'
+  subsysTestsName: 'CodeReview.Orchestrator.SubsystemTests'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: Build
+  displayName: Build and run tests
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+        - task: gitversion/setup@0
+          displayName: Setup GitVersion
+          inputs:
+            versionSpec: '5.x'
+
+        - script: pwd && ls
+
+        - task: gitversion/execute@0
+          displayName: Execute GitVersion
+
+        - task: DotNetCoreCLI@2
+          displayName: Build project
+          inputs:
+            command: 'build'
+            projects: './src/$(srcName)/$(srcName).csproj'
+            arguments: '-c $(buildConfiguration)'
+
+        - task: DockerInstaller@0
+          displayName: Install docker CLI
+          inputs:
+            dockerVersion: '17.09.0-ce'
+
+        - script: docker pull rodolpheche/wiremock
+          displayName: Pull rodolpheche/wiremock image
+
+        - script: docker run -d -it --name rodolpheche-wiremock-container --rm -p $(wiremockPort) rodolpheche/wiremock
+          displayName: Run rodolpheche-wiremock-container container
+
+        - task: DotNetCoreCLI@2
+          displayName: Run subsystem tests
+          inputs:
+            command: 'test'
+            projects: './test/$(subsysTestsName)/$(subsysTestsName).csproj'
+            arguments: '-c $(buildConfiguration)'
+            testRunTitle: 'Subsystem tests'
+          env:
+            DOTNET_ENVIRONMENT: 'Azure'
+
+        - script: docker rm -f rodolpheche-wiremock-container
+          displayName: Remove rodolpheche-wiremock-container container
