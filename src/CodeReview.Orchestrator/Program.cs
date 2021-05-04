@@ -25,7 +25,7 @@ namespace GodelTech.CodeReview.Orchestrator
                 x.HelpWriter = TextWriter.Null;
             });
 
-            var result = parser.ParseArguments<RunOptions, NewAnalysisManifestOptions, EvaluateOptions, NewDockerEngineCollectionManifestOptions>(args);
+            var result = parser.ParseArguments<RunOptions, NewAnalysisManifestOptions, EvaluateOptions, NewDockerEngineCollectionManifestOptions, ExtractMetadataOptions>(args);
 
             var exitCode = result
                 .MapResult(
@@ -33,6 +33,7 @@ namespace GodelTech.CodeReview.Orchestrator
                     (NewAnalysisManifestOptions x) => ProcessNewAsync(x, container).GetAwaiter().GetResult(),
                     (NewDockerEngineCollectionManifestOptions x) => ProcessEvaluateAsync(x, container).GetAwaiter().GetResult(),
                     (EvaluateOptions x) => ProcessEvaluateAsync(x, container).GetAwaiter().GetResult(),
+                    (ExtractMetadataOptions x) => ProcessExtractMetadataAsync(x, container).GetAwaiter().GetResult(),
                     _ => ProcessErrors(result));
 
             return exitCode;
@@ -71,6 +72,11 @@ namespace GodelTech.CodeReview.Orchestrator
             return container.GetRequiredService<IRunAnalysisCommand>().ExecuteAsync(options);
         }
 
+        private static Task<int> ProcessExtractMetadataAsync(ExtractMetadataOptions options, IServiceProvider container)
+        {
+            return container.GetRequiredService<IExtractMetadataCommand>().ExecuteAsync(options);
+        }
+
         private static ServiceProvider CreateServiceProvider()
         {
             var serviceProvider = new ServiceCollection();
@@ -87,6 +93,7 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddSingleton<IPathService, PathService>();
             serviceProvider.AddSingleton<IDirectoryService, DirectoryService>();
 
+            serviceProvider.AddSingleton<ICommandLineJsonConvert, CommandLineJsonConvert>();
             serviceProvider.AddSingleton<IDockerEngineProvider, DockerEngineProvider>();
             serviceProvider.AddSingleton<IDockerEngineContext, DockerEngineContext>();
             serviceProvider.AddSingleton<IVariableExpressionProvider, VariableExpressionProvider>();
@@ -111,6 +118,7 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddTransient<IValidateManifestCommand, ValidateManifestCommand>();
             serviceProvider.AddTransient<ICreateDockerEngineCollectionManifestCommand, CreateDockerEngineCollectionManifestCommand>();
             serviceProvider.AddTransient<IOutputFolderPathCalculator, OutputFolderPathCalculator>();
+            serviceProvider.AddTransient<IExtractMetadataCommand, ExtractMetadataCommand>();
 
             return serviceProvider.BuildServiceProvider();
         }

@@ -42,6 +42,8 @@
       <EmbeddedResource Include="Resources\Run\git_container_post_body.json" />
       <None Remove="Resources\Run\artifacts.zip" />
       <EmbeddedResource Include="Resources\Run\artifacts.zip" />
+      <None Remove="Resources\ExtractMetadata\metadata_output.txt" />
+      <EmbeddedResource Include="Resources\ExtractMetadata\metadata_output.txt" />
     </ItemGroup>
 
 </Project>
