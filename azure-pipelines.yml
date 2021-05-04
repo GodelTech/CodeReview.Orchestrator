@@ -1,7 +1,8 @@
 trigger:
   - main
 
-pr: none
+pr:
+  - main
 
 resources:
   - repo: self
@@ -44,14 +45,14 @@ stages:
               packagesToPush: ./$(artifactstagingdirectory)/*.nupkg
               nuGetFeedType: external
               publishFeedCredentials: NuGet
-          - task: Docker@2
-            displayName: Build and Push an image
-            inputs:
-              buildContext: './src/'
-              containerRegistry: 'docker-hub'
-              repository: $(repository)
-              command: 'buildAndPush'
-              Dockerfile: './src/$(foldername)/Dockerfile'
-              tags: |
-                $(Build.BuildNumber)
-                latest
+          #- task: Docker@2
+          #  displayName: Build and Push an image
+          #  inputs:
+          #    buildContext: './src/'
+          #    containerRegistry: 'docker-hub'
+          #    repository: $(repository)
+          #    command: 'buildAndPush'
+          #    Dockerfile: './src/$(foldername)/Dockerfile'
+          #    tags: |
+          #      $(Build.BuildNumber)
+          #      latest
