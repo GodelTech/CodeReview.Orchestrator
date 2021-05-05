@@ -93,7 +93,8 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddSingleton<IPathService, PathService>();
             serviceProvider.AddSingleton<IDirectoryService, DirectoryService>();
 
-            serviceProvider.AddSingleton<ICommandLineJsonConvert, CommandLineJsonConvert>();
+            serviceProvider.AddSingleton<ICommandLineOptionsTypeProvider, CommandLineOptionsTypeProvider>();
+            serviceProvider.AddSingleton<IOptionMetadataProvider, OptionMetadataProvider>();
             serviceProvider.AddSingleton<IDockerEngineProvider, DockerEngineProvider>();
             serviceProvider.AddSingleton<IDockerEngineContext, DockerEngineContext>();
             serviceProvider.AddSingleton<IVariableExpressionProvider, VariableExpressionProvider>();

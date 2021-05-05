@@ -7,15 +7,34 @@ using Newtonsoft.Json;
 
 namespace GodelTech.CodeReview.Orchestrator.Utils
 {
-    public class CommandLineJsonConvert : ICommandLineJsonConvert
+    public class OptionMetadataProvider : IOptionMetadataProvider
     {
-        public string Serialize(params Type[] type)
+        private readonly ICommandLineOptionsTypeProvider _commandLineOptionsTypeProvider;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
+
+        public OptionMetadataProvider(ICommandLineOptionsTypeProvider commandLineOptionsTypeProvider)
         {
-            if (type is null) throw new ArgumentNullException(nameof(type));
+            _commandLineOptionsTypeProvider = commandLineOptionsTypeProvider ?? throw new ArgumentNullException(nameof(commandLineOptionsTypeProvider));
+
+            _jsonSerializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore, 
+                Formatting = Formatting.Indented
+            };
+        }
+
+        public string GetOptionsMetadata(Assembly assembly = null)
+        {
+            assembly ??= Assembly.GetExecutingAssembly();
+
+            var optionTypes = _commandLineOptionsTypeProvider.GetOptions(assembly);
 
             return JsonConvert.SerializeObject(
-                new { Commands =  type.Select(SerializeType) },
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                new
+                {
+                    Commands =  optionTypes.Select(SerializeType)
+                },
+                _jsonSerializerSettings);
         }
 
         private static object SerializeType(Type type)
