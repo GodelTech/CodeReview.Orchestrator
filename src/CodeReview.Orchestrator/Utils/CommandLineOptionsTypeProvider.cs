@@ -13,7 +13,7 @@ namespace GodelTech.CodeReview.Orchestrator.Utils
             if (assembly is null) throw new ArgumentNullException(nameof(assembly));
             
             return assembly.GetTypes()
-                .Where(p => CustomAttributeExtensions.GetCustomAttribute<VerbAttribute>((MemberInfo) p) is not null)
+                .Where(p => p.GetCustomAttribute<VerbAttribute>() is not null)
                 .ToArray();
         }
     }

@@ -23,9 +23,9 @@ namespace GodelTech.CodeReview.Orchestrator.Utils
             };
         }
 
-        public string GetOptionsMetadata(Assembly assembly = null)
+        public string GetOptionsMetadata()
         {
-            assembly ??= Assembly.GetExecutingAssembly();
+            var assembly = Assembly.GetExecutingAssembly();
 
             var optionTypes = _commandLineOptionsTypeProvider.GetOptions(assembly);
 
