@@ -40,3 +40,12 @@ Validating manifest file
 | ------------- | --------- | --------- | --------- | ------------------------- |
 | --file        | -f        | true      | string    | Path to workflow file     |
 | --output      | -o        | true      | string    | Path to output file       |
+
+#### extract-metadata
+Generate a json with all commands and parameters.
+<pre>
+> dotnet CodeReview.Orchestrator.dll extract-metadata -o output.txt
+</pre>
+| Agruments     | Key       | Required  | Type      | Description agrument      |
+| ------------- | --------- | --------- | --------- | ------------------------- |
+| --output      | -o        | true      | string    | Path to output file       |
