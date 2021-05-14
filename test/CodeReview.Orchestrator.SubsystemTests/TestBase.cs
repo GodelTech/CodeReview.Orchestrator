@@ -1,19 +1,9 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
 namespace CodeReview.Orchestrator.SubsystemTests
 {
     [Collection(nameof(StartUpFixture))]
-    public class TestBase : IDisposable
+    public class TestBase
     {
-        protected TestBase()
-        {
-            GodelTech.StoryLine.Wiremock.Config.ResetAll();
-        }
-
-        public void Dispose()
-        {
-            GodelTech.StoryLine.Wiremock.Config.ResetAll();
-        }
     }
 }

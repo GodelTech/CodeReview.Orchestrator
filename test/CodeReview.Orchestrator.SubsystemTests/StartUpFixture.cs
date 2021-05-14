@@ -15,6 +15,8 @@ namespace CodeReview.Orchestrator.SubsystemTests
             Config.Assembly = typeof(TestBase).Assembly;
             Config.ResourcePath = "CodeReview.Orchestrator.SubsystemTests.Resources";
             GodelTech.StoryLine.Wiremock.Config.SetBaseAddress(configuration["WiremockAddress"]);
+
+            Directory.CreateDirectory(Config.OutputDirectoryPath);
         }
 
         public void Dispose()

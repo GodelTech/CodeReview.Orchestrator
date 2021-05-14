@@ -1,3 +1,4 @@
+using System.IO;
 using CodeReview.Orchestrator.SubsystemTests.Actions;
 using CodeReview.Orchestrator.SubsystemTests.Expectations;
 using CodeReview.Orchestrator.SubsystemTests.Utils;
@@ -37,6 +38,24 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                 .Performs<ExecuteProcess>(proc => proc
                     .WithCommandArg("extract-metadata")
                     .WithCommandArg(outputArg, outputArgValue))
+                .Then()
+                .Expects<ProcessResult>(proc => proc
+                    .ExitCode(Constants.ExitCode.Error))
+                .Run();
+        }
+        
+        [Theory]
+        [InlineData("-o")]
+        [InlineData("--output")]
+        public void When_Output_Path_Does_Not_Exist_Should_Return_Error(string outputArg)
+        {
+            var outputPath = Path.Combine("tmp", MetadataName);
+            
+            Scenario.New()
+                .When()
+                .Performs<ExecuteProcess>(proc => proc
+                    .WithCommandArg("extract-metadata")
+                    .WithCommandArg(outputArg, outputPath))
                 .Then()
                 .Expects<ProcessResult>(proc => proc
                     .ExitCode(Constants.ExitCode.Error))
