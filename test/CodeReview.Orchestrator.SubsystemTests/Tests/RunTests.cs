@@ -9,7 +9,7 @@ using Xunit;
 
 namespace CodeReview.Orchestrator.SubsystemTests.Tests
 {
-    public class RunTests : TestBase
+    public class RunTests : WiremockTestBase
     {
         private const string AlpineImage = "alpine";
         private const string GitProviderImage = "godeltech/codereview.tools.gitprovider";

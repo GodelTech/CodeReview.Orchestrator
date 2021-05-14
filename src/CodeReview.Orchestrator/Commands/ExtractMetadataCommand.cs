@@ -4,6 +4,7 @@ using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Options;
 using GodelTech.CodeReview.Orchestrator.Services;
 using GodelTech.CodeReview.Orchestrator.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Commands
 {
@@ -12,16 +13,19 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
         private readonly IFileService _fileService;
         private readonly IPathService _pathService;
         private readonly IDirectoryService _directoryService;
+        private readonly ILogger<ExtractMetadataCommand> _logger;
         private readonly IOptionMetadataProvider _optionMetadataProvider;
 
         public ExtractMetadataCommand(
             IFileService fileService, 
-            IPathService pathService, 
+            IPathService pathService,
             IDirectoryService directoryService, 
+            ILogger<ExtractMetadataCommand> logger,
             IOptionMetadataProvider optionMetadataProvider)
         {
-            _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
+            _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
             _optionMetadataProvider = optionMetadataProvider ?? throw new ArgumentNullException(nameof(optionMetadataProvider));
         } 
@@ -31,10 +35,17 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
             if (options is null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrWhiteSpace(options.OutputPath)) throw new ArgumentNullException(nameof(options.OutputPath), "Value cannot be null or whitespace.");
 
-            var metadata = _optionMetadataProvider.GetOptionsMetadata();
+            var fullPath = _pathService.GetFullPath(options.OutputPath);
             var directoryPath = _pathService.GetDirectoryName(options.OutputPath);
+
+            if (!_directoryService.Exists(directoryPath))
+            {
+                _logger.LogError("Could not find a part of the path '{Path}'", fullPath);
+                
+                return Constants.ErrorExitCode;
+            }
             
-            _directoryService.CreateDirectory(directoryPath);
+            var metadata = _optionMetadataProvider.GetOptionsMetadata();
             
             await _fileService.WriteAllTextAsync(options.OutputPath, metadata);
             
