@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Model;
@@ -35,7 +36,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
 
-        public async Task SwitchAsync(IProcessingContext context, RequirementsManifest requirements)
+        public async Task SwitchAsync(IProcessingContext context, RequirementsManifest requirements, IReadOnlyDictionary<string, Volume> volumesToCopy)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -53,24 +54,24 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (_engineContext.Engine.Equals(matchingEngine))
                 return;
             
-            await SwitchVolumesAsync(context, matchingEngine);
+            await SwitchVolumesAsync(context, matchingEngine, volumesToCopy);
         }
 
-        private async Task SwitchVolumesAsync(IProcessingContext context, DockerEngine newEngine)
+        private async Task SwitchVolumesAsync(IProcessingContext context, DockerEngine newEngine, IReadOnlyDictionary<string, Volume> volumesToCopy)
         {
             using var folder = _tempFolderFactory.Create();
-            
-            var artifactsFolder = _pathService.Combine(folder.Path, "artifacts");
-            var srcFolder = _pathService.Combine(folder.Path, "src");
-            var importsFolder = _pathService.Combine(folder.Path, "imports");
 
-            var containerId = await CreateWorkerContainerAsync(context);
+            var containerId = await CreateWorkerContainerAsync(context, volumesToCopy);
 
             try
             {
-                await ExportFolderContent(containerId, GetArtifactsFolderForOs(_engineContext.Engine.Os), artifactsFolder);
-                await ExportFolderContent(containerId, GetSrcFolderForOs(_engineContext.Engine.Os), srcFolder);
-                await ExportFolderContent(containerId, GetImportsFolderForOs(_engineContext.Engine.Os), importsFolder);
+                foreach (var (volumeName, volume) in volumesToCopy)
+                {
+                    var volumeHostFolder = _pathService.Combine(folder.Path, volumeName);
+                    var volumeContainerFolder = volume.TargetFolder;
+
+                    await ExportFolderContent(containerId, volumeContainerFolder, volumeHostFolder);
+                }
             }
             finally
             {
@@ -81,15 +82,19 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             _engineContext.Engine = newEngine;
 
-            await context.InitializeAsync();
+            await context.InitializeAsync(volumesToCopy.Keys.ToArray());
 
-            containerId = await CreateWorkerContainerAsync(context);
+            containerId = await CreateWorkerContainerAsync(context, volumesToCopy);
 
             try
             {
-                await ImportDataToContainerAsync(artifactsFolder, containerId, GetArtifactsFolderForOs(_engineContext.Engine.Os));
-                await ImportDataToContainerAsync(srcFolder, containerId, GetSrcFolderForOs(_engineContext.Engine.Os));
-                await ImportDataToContainerAsync(importsFolder, containerId, GetImportsFolderForOs(_engineContext.Engine.Os));
+                foreach (var (volumeName, volume) in volumesToCopy)
+                {
+                    var volumeHostFolder = _pathService.Combine(folder.Path, volumeName);
+                    var volumeContainerFolder = volume.TargetFolder;
+
+                    await ImportDataToContainerAsync(volumeHostFolder, containerId, volumeContainerFolder);
+                }
             }
             finally
             {
@@ -107,30 +112,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             await _containerService.ImportFilesIntoContainerAsync(containerId, containerFolder, outStream);
         }
 
-        private async Task<string> CreateWorkerContainerAsync(IProcessingContext context)
+        private async Task<string> CreateWorkerContainerAsync(IProcessingContext context, IReadOnlyDictionary<string, Volume> volumes)
         {
-            return await _containerService.CreateContainerAsync(
-                _engineContext.Engine.WorkerImage,
-                Array.Empty<string>(),
-                ImmutableDictionary<string, string>.Empty,
-                new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = context.ArtifactsVolumeId,
-                    Target = GetArtifactsFolderForOs(_engineContext.Engine.Os)
-                },
-                new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = context.SourceCodeVolumeId,
-                    Target = GetSrcFolderForOs(_engineContext.Engine.Os)
-                },
-                new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = context.ImportsVolumeId,
-                    Target = GetImportsFolderForOs(_engineContext.Engine.Os)
-                });
+            var mountedVolumes = ResolveMountedVolumes(context, volumes).ToArray();
+            
+            return await _containerService.CreateContainerAsync(_engineContext.Engine.WorkerImage, mountedVolumes);
         }
 
         private async Task ExportFolderContent(string containerId, string containerFolder, string hostFolderPath)
@@ -143,20 +129,16 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             _tarArchiveService.Extract(outStream, hostFolderPath, containerFolder);
         }
-
-        private static string GetSrcFolderForOs(OperatingSystemType os)
+        
+        private static IEnumerable<MountedVolume> ResolveMountedVolumes(IProcessingContext context, IReadOnlyDictionary<string, Volume> volumes)
         {
-            return os == OperatingSystemType.Linux ? "/src" : "C:\\src";
-        }
-
-        private static string GetArtifactsFolderForOs(OperatingSystemType os)
-        {
-            return os == OperatingSystemType.Linux ? "/artifacts" : "C:\\artifacts";
-        }
-
-        private static string GetImportsFolderForOs(OperatingSystemType os)
-        {
-            return os == OperatingSystemType.Linux ? "/imports" : "C:\\imports";
+            return volumes.Select(pair => new MountedVolume
+            {
+                IsBindMount = false,
+                Source = context.Volumes[pair.Key],
+                Target = pair.Value.TargetFolder,
+                IsReadOnly = pair.Value.ReadOnly
+            });
         }
     }
 }

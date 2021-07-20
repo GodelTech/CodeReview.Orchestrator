@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Model;
 
@@ -6,6 +7,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface IDockerContextSwitcher
     {
-        Task SwitchAsync(IProcessingContext context, RequirementsManifest requirements);
+        Task SwitchAsync(IProcessingContext context, RequirementsManifest requirements, IReadOnlyDictionary<string, Volume> volumes);
     }
 }

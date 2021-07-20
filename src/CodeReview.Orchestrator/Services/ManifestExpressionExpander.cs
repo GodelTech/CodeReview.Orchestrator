@@ -43,8 +43,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (manifest.Command != null)
                 manifest.Command = manifest.Command.Select(x => _expressionEvaluator.Evaluate(x)).ToArray();
 
-            manifest.Volumes.Artifacts = _expressionEvaluator.Evaluate(manifest.Volumes.Artifacts);
-            manifest.Volumes.Sources = _expressionEvaluator.Evaluate(manifest.Volumes.Sources);
+            manifest.Volumes_old.Artifacts = _expressionEvaluator.Evaluate(manifest.Volumes_old.Artifacts);
+            manifest.Volumes_old.Sources = _expressionEvaluator.Evaluate(manifest.Volumes_old.Sources);
         }
     }
 }

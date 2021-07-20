@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
@@ -35,38 +37,56 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
         public IActivity Create(AnalysisManifest manifest)
         {
-            if (manifest == null) 
-                throw new ArgumentNullException(nameof(manifest));
+            if (manifest == null) throw new ArgumentNullException(nameof(manifest));
 
-            return new CompositeActivity(
-                new ImportDataActivity(
-                    manifest.Imports,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _loggerFactory.CreateLogger<ImportDataActivity>()),
-                new ImportSourcesActivity(
-                    manifest.Sources,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _loggerFactory.CreateLogger<ImportSourcesActivity>()),
-                new RunProcessorsActivity(
-                    manifest.Activities, 
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunProcessorsActivity>()),
-                new ExportArtifactsActivity(
-                    manifest.Artifacts,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _pathService,
-                    _loggerFactory.CreateLogger<ExportArtifactsActivity>())
-                );
+            var activities = Enumerable.Empty<IActivity>()
+                .Concat(CreateImportActivities(manifest))
+                .Concat(CreateRunProcessorsActivity(manifest))
+                .Concat(CreateExportActivities(manifest))
+                .ToArray();
+            
+            return new CompositeActivity(activities);
+        }
 
+        private IEnumerable<IActivity> CreateImportActivities(AnalysisManifest manifest)
+        {
+            var volumes = manifest.Volumes.Where(p => !string.IsNullOrWhiteSpace(p.Value.FolderToImport));
+            
+            foreach (var (volumeName, volume) in volumes)
+            {
+                var logger = _loggerFactory.CreateLogger<ImportFolderActivity>();
+                
+                yield return new ImportFolderActivity(_engineContext, _containerService, _archiveService, _directoryService, logger)
+                {
+                    Volume = volumeName,
+                    HostFolderPath = volume.FolderToImport,
+                    ContainerFolderPath = volume.TargetFolder
+                };
+            }
+        }
+
+        private IEnumerable<IActivity> CreateRunProcessorsActivity(AnalysisManifest manifest)
+        {
+            var logger = _loggerFactory.CreateLogger<RunProcessorsActivity>();
+
+            yield return new RunProcessorsActivity(manifest, _activityExecutor, logger);
+        }
+        
+        private IEnumerable<IActivity> CreateExportActivities(AnalysisManifest manifest)
+        {
+            var volumes = manifest.Volumes.Where(p => !string.IsNullOrWhiteSpace(p.Value.FolderToOutput));
+            
+            foreach (var (volumeName, volume) in volumes)
+            {
+                var logger = _loggerFactory.CreateLogger<ExportFolderActivity>();
+                
+                yield return new ExportFolderActivity(_engineContext, _containerService, _archiveService, _directoryService, _pathService, logger)
+                {
+                    Volume = volumeName,
+                    HostFolderPath = volume.FolderToOutput,
+                    ContainerFolderPath = volume.TargetFolder
+                };
+            }
         }
     }
 }

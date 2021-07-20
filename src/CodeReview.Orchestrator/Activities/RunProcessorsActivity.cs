@@ -8,16 +8,16 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class RunProcessorsActivity : IActivity
     {
-        private readonly IReadOnlyDictionary<string, ActivityManifest> _activities;
+        private readonly AnalysisManifest _analysisManifest;
         private readonly IActivityExecutor _activityExecutor;
         private readonly ILogger<RunProcessorsActivity> _logger;
 
         public RunProcessorsActivity(
-            IReadOnlyDictionary<string, ActivityManifest> activities,
+            AnalysisManifest analysisManifest,
             IActivityExecutor activityExecutor,
             ILogger<RunProcessorsActivity> logger)
         {
-            _activities = activities ?? throw new ArgumentNullException(nameof(activities));
+            _analysisManifest = analysisManifest ?? throw new ArgumentNullException(nameof(analysisManifest));
             _activityExecutor = activityExecutor ?? throw new ArgumentNullException(nameof(activityExecutor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -27,10 +27,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             if (context == null) 
                 throw new ArgumentNullException(nameof(context));
 
-            foreach (var (activityName, manifest) in _activities)
+            foreach (var (activityName, manifest) in _analysisManifest.Activities)
             {
                 _logger.LogInformation("Running activity: {activityName}", activityName);
 
+                OverrideActivityVolumes(manifest);
+                
                 try
                 {
                     var result = await _activityExecutor.ExecuteAsync(
@@ -49,6 +51,22 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             }
 
             return true;
+        }
+
+        //TODO:
+        private void OverrideActivityVolumes(ActivityManifest activityManifest)
+        {
+            foreach (var (volumeName, volume) in _analysisManifest.Volumes)
+            {
+                if (activityManifest.Volumes.TryGetValue(volumeName, out var activityVolume))
+                {
+                    
+                }
+                else
+                {
+                    activityManifest.Volumes.Add(volumeName, volume);
+                }
+            }
         }
     }
 }

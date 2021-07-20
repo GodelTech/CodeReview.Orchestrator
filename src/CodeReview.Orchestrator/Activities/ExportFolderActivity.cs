@@ -8,28 +8,27 @@ using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
 {
-    public class ExportArtifactsActivity : IActivity
+    public class ExportFolderActivity : IActivity
     {
-        private const string ArtifactsFolderPath = "/artifacts";
-
-        private readonly ArtifactsSettings _settings;
         private readonly IDockerEngineContext _engineContext;
         private readonly IContainerService _containerService;
         private readonly ITarArchiveService _tarArchiveService;
         private readonly IDirectoryService _directoryService;
         private readonly IPathService _pathService;
-        private readonly ILogger<ExportArtifactsActivity> _logger;
+        private readonly ILogger<ExportFolderActivity> _logger;
 
-        public ExportArtifactsActivity(
-            ArtifactsSettings importedDataSettings,
+        public string ContainerFolderPath { get; init; }
+        public string HostFolderPath { get; init; }
+        public string Volume { get; init; }
+        
+        public ExportFolderActivity(
             IDockerEngineContext engineContext,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
             IDirectoryService directoryService,
             IPathService pathService,
-            ILogger<ExportArtifactsActivity> logger)
+            ILogger<ExportFolderActivity> logger)
         {
-            _settings = importedDataSettings ?? throw new ArgumentNullException(nameof(importedDataSettings));
             _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _tarArchiveService = tarArchiveService ?? throw new ArgumentNullException(nameof(tarArchiveService));
@@ -43,13 +42,14 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (!_settings.ExportOnCompletion)
-            {
-                _logger.LogInformation("Artifacts export is not required.");
-                return true;
-            }
+            //TODO:
+            //if (!_settings.ExportOnCompletion)
+            //{
+            //    _logger.LogInformation("Artifacts export is not required.");
+            //    return true;
+            //}
 
-            var folderPath = context.ResolvePath(_settings.FolderPath);
+            var folderPath = context.ResolvePath(HostFolderPath);
 
             if (!_directoryService.Exists(folderPath))
             {
@@ -66,19 +66,19 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 new MountedVolume
                 {
                     IsBindMount = false,
-                    Source = context.ArtifactsVolumeId,
-                    Target = ArtifactsFolderPath
+                    Source = context.Volumes[Volume],
+                    Target = ContainerFolderPath
                 });
 
             try
             {
                 await using (var outStream = new MemoryStream())
                 {
-                    await _containerService.ExportFilesFromContainerAsync(containerId, ArtifactsFolderPath, outStream);
+                    await _containerService.ExportFilesFromContainerAsync(containerId, HostFolderPath, outStream);
 
                     outStream.Position = 0;
 
-                    _tarArchiveService.Extract(outStream, folderPath, ArtifactsFolderPath);
+                    _tarArchiveService.Extract(outStream, folderPath, HostFolderPath);
                 }
 
                 _logger.LogInformation("Artifacts export completed.");

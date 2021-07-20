@@ -57,7 +57,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/jetbrains",
-                        Volumes = new()
+                        Volumes_old = new()
                         {
                             UseWindowsDefaults = false,
                             Artifacts = "/artifacts",
@@ -90,7 +90,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/jetbrains",
-                        Volumes = new()
+                        Volumes_old = new()
                         {
                             Artifacts = "/artifacts",
                             Sources = "/src",
@@ -124,7 +124,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/roslyn",
-                        Volumes = new()
+                        Volumes_old = new()
                         {
                             UseWindowsDefaults = true
                         },

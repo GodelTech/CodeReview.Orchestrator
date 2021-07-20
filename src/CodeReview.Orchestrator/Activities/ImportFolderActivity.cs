@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
 {
-    public abstract class ImportFolderActivity : IActivity
+    public class ImportFolderActivity : IActivity
     {
         private readonly IDockerEngineContext _engineContext;
         private readonly IContainerService _containerService;
@@ -15,10 +14,11 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly IDirectoryService _directoryService;
         private readonly ILogger _logger;
 
-        protected abstract string ContainerFolderPath { get; }
-        protected abstract string HostFolderPath { get; }
+        public string ContainerFolderPath { get; init; }
+        public string HostFolderPath { get; init; }
+        public string Volume { get; init; }
 
-        protected ImportFolderActivity(
+        public ImportFolderActivity(
             IDockerEngineContext engineContext,
             IContainerService containerService,
             ITarArchiveService tarArchiveService,
@@ -54,7 +54,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 new MountedVolume
                 {
                     IsBindMount = false,
-                    Source = GetVolumeToMount(context),
+                    Source = context.Volumes[Volume],
                     Target = ContainerFolderPath
                 });
 
@@ -73,7 +73,5 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
             return true;
         }
-
-        protected abstract string GetVolumeToMount(IProcessingContext context);
     }
 }

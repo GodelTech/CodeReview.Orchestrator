@@ -13,7 +13,9 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         public Dictionary<string, string> Environment { get; set; } = new();
         
         [Required]
-        public VolumesManifest Volumes { get; set; } = new();
+        public VolumesManifest Volumes_old { get; set; } = new();
+
+        public Dictionary<string, Volume> Volumes { get; set; } = new();
         
         [Required]
         public ActivitySettings Settings { get; set; } = new();

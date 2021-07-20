@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Services;
 
@@ -9,10 +10,9 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly string _manifestFilePath;
         private readonly IContainerService _containerService;
         private readonly IPathService _pathService;
+        private readonly Dictionary<string, string> _volumes = new();
 
-        public string SourceCodeVolumeId { get; private set; }
-        public string ArtifactsVolumeId { get; private set; }
-        public string ImportsVolumeId { get; private set; }
+        public IReadOnlyDictionary<string, string> Volumes => _volumes;
 
         public ProcessingContext(
             string manifestFilePath,
@@ -27,17 +27,19 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(ICollection<string> volumes)
         {
-            SourceCodeVolumeId = await _containerService.CreateVolumeAsync("src");
-            ArtifactsVolumeId = await _containerService.CreateVolumeAsync("art");
-            ImportsVolumeId = await _containerService.CreateVolumeAsync("imp");
+            foreach (var volume in volumes)
+            {
+                var volumeId = await _containerService.CreateVolumeAsync(volume).ConfigureAwait(false);
+                
+                _volumes.Add(volume, volumeId);
+            }
         }
 
         public string ResolvePath(string relativeOrAbsolutePath)
         {
-            if (string.IsNullOrWhiteSpace(relativeOrAbsolutePath))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeOrAbsolutePath));
+            if (string.IsNullOrWhiteSpace(relativeOrAbsolutePath)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeOrAbsolutePath));
 
             if (_pathService.IsPathRooted(relativeOrAbsolutePath))
                 return relativeOrAbsolutePath;
@@ -50,18 +52,12 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
         public async Task CleanUpVolumesAsync()
         {
-            if (!string.IsNullOrEmpty(SourceCodeVolumeId))
-                await _containerService.RemoveVolumeAsync(SourceCodeVolumeId);
-
-            if (!string.IsNullOrEmpty(ArtifactsVolumeId))
-                await _containerService.RemoveVolumeAsync(ArtifactsVolumeId);
-
-            if (!string.IsNullOrEmpty(ImportsVolumeId))
-                await _containerService.RemoveVolumeAsync(ImportsVolumeId);
-
-            SourceCodeVolumeId = null;
-            ArtifactsVolumeId = null;
-            ImportsVolumeId = null;
+            foreach (var (_, volumeId) in _volumes)
+            {
+                await _containerService.RemoveVolumeAsync(volumeId);
+            }
+            
+            _volumes.Clear();
         }
 
         public async ValueTask DisposeAsync()
