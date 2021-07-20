@@ -1,5 +1,9 @@
 {
   "profiles": {
+    "CodeReview.Orchestrator - new": {
+      "commandName": "Project",
+      "commandLineArgs": "new -o manifest.yml"
+    },
     "CodeReview.Orchestrator - ReSharper": {
       "commandName": "Project",
       "commandLineArgs": "run -f ../../../../../docs/manifests/git-resharper-converter.yaml"

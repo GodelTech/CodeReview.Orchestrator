@@ -8,6 +8,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
     {
         Task<string> CreateVolumeAsync(string volumePrefix);
         Task RemoveVolumeAsync(string volumeId);
+        Task<string> CreateContainerAsync(string imageName, params MountedVolume[] volumes);
         Task<string> CreateContainerAsync(string imageName, string[] commandLineArgs, IReadOnlyDictionary<string, string> envVariables, params MountedVolume[] volumes);
         Task StartContainerAsync(string containerId);
         Task StopContainerAsync(string containerId, int waitBeforeKillSeconds = 30);

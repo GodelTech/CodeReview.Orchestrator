@@ -1,5 +1,16 @@
-﻿artifacts:
-  exportOnCompletion: true
+﻿volumes:
+  artifacts:
+    readOnly: false
+    targetFolder: /artifacts
+    folderToOutput: ./artifacts
+  sources:
+    readOnly: false
+    targetFolder: /src
+    folderToImport: ./imports
+  imports:
+    readOnly: true
+    targetFolder: /imports
+    folderToImport: ./imports
 variables:
   srcPath: /src
 activities:
@@ -8,5 +19,3 @@ activities:
     environment:
       GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
       GIT_BRANCH: main
-    volumes:
-      sources: ${var.srcPath}

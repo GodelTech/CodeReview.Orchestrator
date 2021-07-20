@@ -23,9 +23,17 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             _variableExpressionProvider.SetVariables(manifest.Variables);
 
-            manifest.Sources.FolderPath = _expressionEvaluator.Evaluate(manifest.Sources.FolderPath);
-            manifest.Artifacts.FolderPath = _expressionEvaluator.Evaluate(manifest.Artifacts.FolderPath);
-            manifest.Imports.FolderPath = _expressionEvaluator.Evaluate(manifest.Imports.FolderPath);
+            foreach (var (_, volume) in manifest.Volumes)
+            {
+                if (!string.IsNullOrWhiteSpace(volume.TargetFolder))
+                    volume.TargetFolder = _expressionEvaluator.Evaluate(volume.TargetFolder);
+                
+                if (!string.IsNullOrWhiteSpace(volume.FolderToImport))
+                    volume.FolderToImport = _expressionEvaluator.Evaluate(volume.FolderToImport);
+                
+                if (!string.IsNullOrWhiteSpace(volume.FolderToOutput))
+                    volume.FolderToOutput = _expressionEvaluator.Evaluate(volume.FolderToOutput);
+            }
             
             manifest.Variables = manifest.Variables.ToDictionary(x => x.Key, x => _expressionEvaluator.Evaluate(x.Value), StringComparer.OrdinalIgnoreCase);
 
@@ -43,8 +51,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (manifest.Command != null)
                 manifest.Command = manifest.Command.Select(x => _expressionEvaluator.Evaluate(x)).ToArray();
 
-            manifest.Volumes.Artifacts = _expressionEvaluator.Evaluate(manifest.Volumes.Artifacts);
-            manifest.Volumes.Sources = _expressionEvaluator.Evaluate(manifest.Volumes.Sources);
+            foreach (var (_, volume) in manifest.Volumes)
+            {
+                if (!string.IsNullOrWhiteSpace(volume.TargetFolder))
+                    volume.TargetFolder = _expressionEvaluator.Evaluate(volume.TargetFolder);
+            }
         }
     }
 }

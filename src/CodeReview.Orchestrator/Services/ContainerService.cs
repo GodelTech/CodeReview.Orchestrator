@@ -78,6 +78,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             await client.Images.CreateImageAsync(parameters, null, new NullProgress());
         }
 
+        public Task<string> CreateContainerAsync(string imageName, params MountedVolume[] volumes)
+            => CreateContainerAsync(imageName, Array.Empty<string>(), ImmutableDictionary<string, string>.Empty, volumes);
+        
         public async Task<string> CreateContainerAsync(
             string imageName,
             string[] commandLineArgs,

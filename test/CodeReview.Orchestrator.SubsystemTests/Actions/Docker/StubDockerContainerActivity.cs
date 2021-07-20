@@ -5,7 +5,7 @@ using GodelTech.StoryLine.Contracts;
 
 namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
 {
-    public class StubDockerContainerGitActivity : IActionBuilder
+    public class StubDockerContainerActivity : IActionBuilder
     {
         private readonly Dictionary<string, string> _envVariables = new();
         
@@ -14,35 +14,35 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
         private string _impVolumeId;
         private string _image;
 
-        public StubDockerContainerGitActivity WithSrcVolumeId(string srcVolumeId)
+        public StubDockerContainerActivity WithSrcVolumeId(string srcVolumeId)
         {
             _srcVolumeId = srcVolumeId ?? throw new ArgumentNullException(nameof(srcVolumeId));
 
             return this;
         }
         
-        public StubDockerContainerGitActivity WithArtVolumeId(string artVolumeId)
+        public StubDockerContainerActivity WithArtVolumeId(string artVolumeId)
         {
             _artVolumeId = artVolumeId ?? throw new ArgumentNullException(nameof(artVolumeId));
 
             return this;
         }
         
-        public StubDockerContainerGitActivity WithImpVolumeId(string impVolumeId)
+        public StubDockerContainerActivity WithImpVolumeId(string impVolumeId)
         {
             _impVolumeId = impVolumeId ?? throw new ArgumentNullException(nameof(impVolumeId));
 
             return this;
         }
         
-        public StubDockerContainerGitActivity WithImage(string image)
+        public StubDockerContainerActivity WithImage(string image)
         {
             _image = image ?? throw new ArgumentNullException(nameof(image));
 
             return this;
         }
 
-        public StubDockerContainerGitActivity WithEnv(string variableName, string value)
+        public StubDockerContainerActivity WithEnv(string variableName, string value)
         {
             if (variableName is null) throw new ArgumentNullException(nameof(variableName));
 

@@ -34,9 +34,11 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         {
             await _dockerContextSwitcher.SwitchAsync(context, manifest.Requirements);
             
+            OverrideVolumes(context, manifest);
+            
             _logger.LogInformation("Current Docker Engine: {engine}", _engineContext.Engine.Name);
             
-            var mounts = ResolveMountedVolumes(manifest.Volumes, context.SourceCodeVolumeId, context.ArtifactsVolumeId, context.ImportsVolumeId).ToArray();
+            var mounts = ResolveMountedVolumes(context).ToArray();
 
             _logger.LogInformation("Creating container. Image = {imageName}...", manifest.Image);
             var containerId = await _containerService.CreateContainerAsync(
@@ -45,7 +47,6 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 manifest.Environment,
                 mounts);
             _logger.LogInformation("Container created.");
-
 
             try
             {
@@ -75,7 +76,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     StdOut = logDetails.StdOut,
                     ExitCode = exitCode
                 };
-            }
+            } 
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to run container.");
@@ -93,33 +94,24 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             }
         }
 
-        private IEnumerable<MountedVolume> ResolveMountedVolumes(VolumesManifest mount, string srcVolumeId,
-            string artifactsVolumeId, string importsVolumeId)
+        private static void OverrideVolumes(IProcessingContext context, ActivityManifest activityManifest)
         {
-            if (!string.IsNullOrWhiteSpace(srcVolumeId))
-                yield return new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = srcVolumeId,
-                    Target = mount.Sources
-                };
-
-            if (!string.IsNullOrWhiteSpace(artifactsVolumeId))
-                yield return new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = artifactsVolumeId,
-                    Target = mount.Artifacts
-                };
-
-            if (!string.IsNullOrWhiteSpace(importsVolumeId))
-                yield return new MountedVolume
-                {
-                    IsBindMount = false,
-                    IsReadOnly = true,
-                    Source = importsVolumeId,
-                    Target = mount.Imports
-                };
+            foreach (var volume in context.Volumes)
+            {
+                if (activityManifest.Volumes.TryGetValue(volume.Name, out var activityVolume))
+                    volume.TargetFolder = activityVolume.TargetFolder;
+            }
+        }
+        
+        private static IEnumerable<MountedVolume> ResolveMountedVolumes(IProcessingContext context)
+        {
+            return context.Volumes.Select(volume => new MountedVolume
+            {
+                IsBindMount = false,
+                Source = context.ResolveVolumeId(volume.Name),
+                Target = volume.TargetFolder,
+                IsReadOnly = volume.ReadOnly
+            });
         }
     }
 }

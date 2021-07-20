@@ -78,7 +78,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
 
             _engineContext.Engine = engine;
             
-            await context.InitializeAsync();
+            await context.InitializeAsync(manifest.Volumes.ListVolumes());
             Logger.LogInformation("Docker Volumes created");
 
             var activity = _activityFactory.Create(manifest);

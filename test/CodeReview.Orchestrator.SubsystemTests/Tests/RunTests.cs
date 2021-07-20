@@ -152,49 +152,73 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
         }
 
         [Fact]
-        public void When_All_Ok_Should_Return_Ok()
+        public void Test()
         {
             const string srcResourceName = "Run.src.txt";
             const string srcOutputName = nameof(RunTests) + "src.txt";
             
             var srcFilePath = Path.Combine("src", srcOutputName);
-            var importFilePath = Path.Combine("imports", srcOutputName);
             
             var srcVolumeId = $"src-{Guid.NewGuid()}";
             var artVolumeId = $"art-{Guid.NewGuid()}";
-            var impVolumeId = $"imp-{Guid.NewGuid()}";
             
             Scenario.New()
                 .Given()
                     .HasPerformed<MoveFileFromResource>(m => m.FromResource(srcResourceName).ToPhysicalFile(srcFilePath))
+                    
+                    .HasPerformed<StubDockerPullImage>(m => m.WithImage(AlpineImage))
+                    .HasPerformed<StubDockerPullImage>(m => m.WithImage(GitProviderImage))
+                    
+                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("src").WithResponseVolumeId(srcVolumeId))
+                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("art").WithResponseVolumeId(artVolumeId))
+                
+                    .HasPerformed<StubDockerImportActivity>(m => m.WithImage(AlpineImage).WithSourceId(srcVolumeId));
+        }
+
+        [Fact]
+        public void When_All_Ok_Should_Return_Ok()
+        {
+            const string srcResourceName = "Run.src.txt";
+            const string srcOutputName = nameof(RunTests) + "src.txt";
+            
+            var sourceFilePath = Path.Combine("src", srcOutputName);
+            var importFilePath = Path.Combine("imports", srcOutputName);
+            
+            var sourceVolumeId = $"sources-{Guid.NewGuid()}";
+            var importsVolumeId = $"imports-{Guid.NewGuid()}";
+            var artifactsVolumeId = $"artifacts-{Guid.NewGuid()}";
+            
+            Scenario.New()
+                .Given()
+                    .HasPerformed<MoveFileFromResource>(m => m.FromResource(srcResourceName).ToPhysicalFile(sourceFilePath))
                     .HasPerformed<MoveFileFromResource>(m => m.FromResource(srcResourceName).ToPhysicalFile(importFilePath))
                 
                     .HasPerformed<StubDockerPullImage>(m => m.WithImage(AlpineImage))
                     .HasPerformed<StubDockerPullImage>(m => m.WithImage(GitProviderImage))
                 
-                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("src").WithResponseVolumeId(srcVolumeId))
-                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("art").WithResponseVolumeId(artVolumeId))
-                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("imp").WithResponseVolumeId(impVolumeId))
+                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("sources").WithResponseVolumeId(sourceVolumeId))
+                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("imports").WithResponseVolumeId(importsVolumeId))
+                    .HasPerformed<StubDockerCreateVolume>(m => m.WithVolumePrefix("artifacts").WithResponseVolumeId(artifactsVolumeId))
                     
-                    .HasPerformed<StubDockerImportDataActivity>(m => m.WithImage(AlpineImage).WithSourceId(impVolumeId))
-                    .HasPerformed<StubDockerImportSourceActivity>(m => m.WithImage(AlpineImage).WithSourceId(srcVolumeId))
+                    .HasPerformed<StubDockerImportDataActivity>(m => m.WithImage(AlpineImage).WithSourceId(importsVolumeId))
+                    .HasPerformed<StubDockerImportSourceActivity>(m => m.WithImage(AlpineImage).WithSourceId(sourceVolumeId))
                 
-                    .HasPerformed<StubDockerContainerGitActivity>(m => m
+                    .HasPerformed<StubDockerContainerActivity>(m => m
                         .WithEnv("GIT_REPOSITORY_URL", "https://github.com/GodelTech/CodeReview.Orchestrator.git")
                         .WithEnv("GIT_BRANCH", "main")
                         .WithImage(GitProviderImage)
-                        .WithArtVolumeId(artVolumeId)
-                        .WithImpVolumeId(impVolumeId)
-                        .WithSrcVolumeId(srcVolumeId))
+                        .WithSrcVolumeId(sourceVolumeId)
+                        .WithArtVolumeId(artifactsVolumeId)
+                        .WithImpVolumeId(importsVolumeId))
                 
                     .HasPerformed<StubDockerExportArtifactsActivity>(m => m
                         .WithImage(AlpineImage)
-                        .WithSourceId(artVolumeId)
+                        .WithSourceId(artifactsVolumeId)
                         .WithArtifactZipResource("Run.artifacts.zip"))
                 
-                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(srcVolumeId))
-                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(artVolumeId))
-                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(impVolumeId))
+                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(sourceVolumeId))
+                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(artifactsVolumeId))
+                    .HasPerformed<StubDockerRemoveVolume>(m => m.WithVolumeId(importsVolumeId))
                 .When()
                     .Performs<ExecuteProcess>(proc => proc
                     .WithCommandArg("run")
