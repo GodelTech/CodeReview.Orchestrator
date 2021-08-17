@@ -13,7 +13,7 @@ namespace CodeReview.Orchestrator.SubsystemTests
 
         public void Dispose()
         {
-            GodelTech.StoryLine.Wiremock.Config.ResetAll();
+            //GodelTech.StoryLine.Wiremock.Config.ResetAll();
         }
     }
 }

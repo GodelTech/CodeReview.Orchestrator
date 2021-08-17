@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using GodelTech.StoryLine;
+using CodeReview.Orchestrator.SubsystemTests.Actions.Wiremock;
 using GodelTech.StoryLine.Contracts;
-using GodelTech.StoryLine.Wiremock.Actions;
 using GodelTech.StoryLine.Wiremock.Builders;
+using Scenario = GodelTech.StoryLine.Scenario;
 
 namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
 {
@@ -16,8 +16,8 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
             var responseBody = CreateResponseBody();
             
             Scenario.New()
-                .When()
-                .Performs<MockHttpRequest>(b => b
+                .When(actor)
+                .Performs<MockScenarioHttpRequest>(b => b
                     .Request(req => req
                         .UrlPath("/volumes/create")
                         .Body()

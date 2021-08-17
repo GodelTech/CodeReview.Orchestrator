@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+       <PackageReference Include="GodelTech.StoryLine.Utils" Version="0.0.1" />
        <PackageReference Include="GodelTech.StoryLine.Wiremock" Version="0.0.1" />
        <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
@@ -34,7 +35,8 @@
       <EmbeddedResource Include="Resources\GenerateDockerEngine\docker-engines.yml" />
       <EmbeddedResource Include="Resources\GenerateManifest\manifest.yml" />
       <EmbeddedResource Include="Resources\Run\engines.yaml" />
-      <EmbeddedResource Include="Resources\Run\git-roslyn-converter.yaml" />
+      <EmbeddedResource Include="Resources\Run\several-image-manifest.yaml" />
+      <EmbeddedResource Include="Resources\Run\single-image-manifest.yaml" />
       <EmbeddedResource Include="Resources\Run\ListImagesResponse.json" />
       <None Remove="Resources\Run\src.txt" />
       <EmbeddedResource Include="Resources\Run\src.txt" />

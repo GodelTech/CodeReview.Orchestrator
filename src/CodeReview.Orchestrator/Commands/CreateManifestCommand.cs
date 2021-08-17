@@ -30,16 +30,19 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                 {
                     ["imports"] = new()
                     {
+                        ReadOnly = false,
                         TargetFolder = "/imports",
                         FolderToImport = "./imports"
                     },
                     ["sources"] = new()
                     {
+                        ReadOnly = true,
                         TargetFolder = "/src",
                         FolderToImport = "./src"
                     },
                     ["artifacts"] = new()
                     {
+                        ReadOnly = false,
                         TargetFolder = "/artifacts",
                         FolderToOutput = "./artifacts"
                     }
