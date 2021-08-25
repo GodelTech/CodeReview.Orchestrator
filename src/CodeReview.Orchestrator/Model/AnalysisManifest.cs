@@ -7,8 +7,10 @@ namespace GodelTech.CodeReview.Orchestrator.Model
     {
         public VolumeCollection Volumes { get; set; } = new();
 
-        [Required] public Dictionary<string, string> Variables { get; set; } = new();
+        [Required] 
+        public Dictionary<string, string> Variables { get; set; } = new();
 
-        [Required] public Dictionary<string, ActivityManifest> Activities { get; set; } = new();
+        [Required] 
+        public Dictionary<string, ActivityManifest> Activities { get; set; } = new();
     }
 }

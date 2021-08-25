@@ -12,7 +12,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly string _manifestFilePath;
         private readonly IContainerService _containerService;
         private readonly IPathService _pathService;
-        private readonly Dictionary<string, Volume> _volumes = new();
+        private readonly Dictionary<string, Volume> _volumes = new(StringComparer.OrdinalIgnoreCase);
 
         public IEnumerable<Volume> Volumes => _volumes.Values;
         
@@ -58,7 +58,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         {
             if (string.IsNullOrWhiteSpace(volumeName)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumeName));
             
-            return _volumes.Single(p => p.Value.Name.Equals(volumeName)).Key;
+            return _volumes.Single(p => p.Value.Name.Equals(volumeName, StringComparison.OrdinalIgnoreCase)).Key;
         }
 
         public async Task CleanUpVolumesAsync()
