@@ -34,10 +34,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             {
                 foreach (var volume in volumes)
                 {
-                    if (!_directoryService.Exists(volume.FolderToImport))
+                    var folderPath = context.ResolvePath(volume.FolderToImport);
+                    
+                    if (!_directoryService.Exists(folderPath))
                         continue;
 
-                    await using var outStream = _tarArchiveService.Create(volume.FolderToImport);
+                    await using var outStream = _tarArchiveService.Create(folderPath);
 
                     await _containerService.ImportFilesIntoContainerAsync(containerId, volume.TargetFolder, outStream);
                 }

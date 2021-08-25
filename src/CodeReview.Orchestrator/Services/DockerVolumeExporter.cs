@@ -32,13 +32,15 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             {
                 foreach (var volume in volumes)
                 {
+                    var folderPath = context.ResolvePath(volume.FolderToOutput);
+                    
                     await using var outStream = new MemoryStream();
                     
                     await _containerService.ExportFilesFromContainerAsync(containerId, volume.TargetFolder, outStream);
                     
                     outStream.Position = 0;
 
-                    _tarArchiveService.Extract(outStream, volume.FolderToOutput, volume.TargetFolder);
+                    _tarArchiveService.Extract(outStream, folderPath, volume.TargetFolder);
                 }
             }
             finally
