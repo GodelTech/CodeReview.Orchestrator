@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Model;
@@ -9,30 +9,27 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class DockerContextSwitcher : IDockerContextSwitcher
     {
+        private readonly IPathService _pathService;
         private readonly IDockerEngineContext _engineContext;
         private readonly IDockerEngineProvider _engineProvider;
         private readonly ITempFolderFactory _tempFolderFactory;
-        private readonly IContainerService _containerService;
-        private readonly ITarArchiveService _tarArchiveService;
-        private readonly IDirectoryService _directoryService;
-        private readonly IPathService _pathService;
-
+        private readonly IDockerVolumeExporter _dockerVolumeExporter;
+        private readonly IDockerVolumeImporter _dockerVolumeImporter;
+        
         public DockerContextSwitcher(
-            IDockerEngineContext engineContext,
-            IDockerEngineProvider engineProvider,
+            IPathService pathService, 
+            IDockerEngineContext engineContext, 
+            IDockerEngineProvider engineProvider, 
             ITempFolderFactory tempFolderFactory,
-            IContainerService containerService,
-            ITarArchiveService tarArchiveService,
-            IDirectoryService directoryService,
-            IPathService pathService)
+            IDockerVolumeExporter dockerVolumeExporter, 
+            IDockerVolumeImporter dockerVolumeImporter)
         {
+            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
             _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
             _engineProvider = engineProvider ?? throw new ArgumentNullException(nameof(engineProvider));
             _tempFolderFactory = tempFolderFactory ?? throw new ArgumentNullException(nameof(tempFolderFactory));
-            _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
-            _tarArchiveService = tarArchiveService ?? throw new ArgumentNullException(nameof(tarArchiveService));
-            _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
-            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
+            _dockerVolumeExporter = dockerVolumeExporter ?? throw new ArgumentNullException(nameof(dockerVolumeExporter));
+            _dockerVolumeImporter = dockerVolumeImporter ?? throw new ArgumentNullException(nameof(dockerVolumeImporter));
         }
 
         public async Task SwitchAsync(IProcessingContext context, RequirementsManifest requirements)
@@ -52,111 +49,62 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             if (_engineContext.Engine.Equals(matchingEngine))
                 return;
-            
+
             await SwitchVolumesAsync(context, matchingEngine);
         }
 
         private async Task SwitchVolumesAsync(IProcessingContext context, DockerEngine newEngine)
         {
             using var folder = _tempFolderFactory.Create();
+
+            var volumes = CloneVolumes(context).ToList();
             
-            var artifactsFolder = _pathService.Combine(folder.Path, "artifacts");
-            var srcFolder = _pathService.Combine(folder.Path, "src");
-            var importsFolder = _pathService.Combine(folder.Path, "imports");
-
-            var containerId = await CreateWorkerContainerAsync(context);
-
-            try
-            {
-                await ExportFolderContent(containerId, GetArtifactsFolderForOs(_engineContext.Engine.Os), artifactsFolder);
-                await ExportFolderContent(containerId, GetSrcFolderForOs(_engineContext.Engine.Os), srcFolder);
-                await ExportFolderContent(containerId, GetImportsFolderForOs(_engineContext.Engine.Os), importsFolder);
-            }
-            finally
-            {
-                await _containerService.RemoveContainerAsync(containerId);
-            }
+            var volumesToExport = GetVolumesToExport(context, folder.Path);
+            await _dockerVolumeExporter.ExportVolumesAsync(context, volumesToExport);
 
             await context.CleanUpVolumesAsync();
 
             _engineContext.Engine = newEngine;
 
-            await context.InitializeAsync();
+            await context.InitializeAsync(volumes);
 
-            containerId = await CreateWorkerContainerAsync(context);
-
-            try
-            {
-                await ImportDataToContainerAsync(artifactsFolder, containerId, GetArtifactsFolderForOs(_engineContext.Engine.Os));
-                await ImportDataToContainerAsync(srcFolder, containerId, GetSrcFolderForOs(_engineContext.Engine.Os));
-                await ImportDataToContainerAsync(importsFolder, containerId, GetImportsFolderForOs(_engineContext.Engine.Os));
-            }
-            finally
-            {
-                await _containerService.RemoveContainerAsync(containerId);
-            }
+            var volumesToImport = GetVolumesToImport(context, folder.Path);
+            await _dockerVolumeImporter.ImportVolumesAsync(context, volumesToImport);
         }
 
-        private async Task ImportDataToContainerAsync(string dataFolder, string containerId, string containerFolder)
-        {
-            if (!_directoryService.Exists(dataFolder))
-                return;
-            
-            await using var outStream = _tarArchiveService.Create(dataFolder);
-
-            await _containerService.ImportFilesIntoContainerAsync(containerId, containerFolder, outStream);
-        }
-
-        private async Task<string> CreateWorkerContainerAsync(IProcessingContext context)
-        {
-            return await _containerService.CreateContainerAsync(
-                _engineContext.Engine.WorkerImage,
-                Array.Empty<string>(),
-                ImmutableDictionary<string, string>.Empty,
-                new MountedVolume
+        private Volume[] GetVolumesToImport(IProcessingContext context, string folder) =>
+            CloneVolumes(context)
+                .Select(volume =>
                 {
-                    IsBindMount = false,
-                    Source = context.ArtifactsVolumeId,
-                    Target = GetArtifactsFolderForOs(_engineContext.Engine.Os)
-                },
-                new MountedVolume
+                    volume.TargetFolder = GetFolderForOs(volume, _engineContext.Engine.Os);
+                    volume.FolderToImport = _pathService.Combine(folder, volume.Name);
+
+                    return volume;
+                })
+                .ToArray();
+
+        private Volume[] GetVolumesToExport(IProcessingContext context, string folder) =>
+            CloneVolumes(context)
+                .Select(volume =>
                 {
-                    IsBindMount = false,
-                    Source = context.SourceCodeVolumeId,
-                    Target = GetSrcFolderForOs(_engineContext.Engine.Os)
-                },
-                new MountedVolume
-                {
-                    IsBindMount = false,
-                    Source = context.ImportsVolumeId,
-                    Target = GetImportsFolderForOs(_engineContext.Engine.Os)
-                });
-        }
+                    volume.TargetFolder = GetFolderForOs(volume, _engineContext.Engine.Os);
+                    volume.FolderToOutput = _pathService.Combine(folder, volume.Name);
 
-        private async Task ExportFolderContent(string containerId, string containerFolder, string hostFolderPath)
+                    return volume;
+                })
+                .ToArray();
+
+        private static IEnumerable<Volume> CloneVolumes(IProcessingContext context) =>
+            context.Volumes
+                .Select(volume => volume.Clone())
+                .Cast<Volume>();
+
+
+        private static string GetFolderForOs(Volume volume, OperatingSystemType os)
         {
-            await using var outStream = new MemoryStream();
-            
-            await _containerService.ExportFilesFromContainerAsync(containerId, containerFolder, outStream);
-
-            outStream.Position = 0;
-
-            _tarArchiveService.Extract(outStream, hostFolderPath, containerFolder);
-        }
-
-        private static string GetSrcFolderForOs(OperatingSystemType os)
-        {
-            return os == OperatingSystemType.Linux ? "/src" : "C:\\src";
-        }
-
-        private static string GetArtifactsFolderForOs(OperatingSystemType os)
-        {
-            return os == OperatingSystemType.Linux ? "/artifacts" : "C:\\artifacts";
-        }
-
-        private static string GetImportsFolderForOs(OperatingSystemType os)
-        {
-            return os == OperatingSystemType.Linux ? "/imports" : "C:\\imports";
+            return os == OperatingSystemType.Linux
+                ? $"/{volume.Name}"
+                : $"C:\\{volume.Name}";
         }
     }
 }

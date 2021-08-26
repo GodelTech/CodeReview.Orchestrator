@@ -1,40 +1,47 @@
 ﻿using System;
 using System.IO;
-using CodeReview.Orchestrator.SubsystemTests.Utils;
 using GodelTech.StoryLine.Contracts;
 
-namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
+namespace CodeReview.Orchestrator.SubsystemTests.Actions.Activities
 {
-    public class StubDockerExportArtifactsActivity : IActionBuilder
+    public class StubExportActivity : IActionBuilder
     {
         private string _image;
         private string _sourceId;
         private string _resourceName;
+        private string _targetFolder;
 
-        public StubDockerExportArtifactsActivity WithArtifactZipResource(string resourceName)
+        public StubExportActivity WithResource(string resourceName)
         {
             _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
 
             return this;
         }
         
-        public StubDockerExportArtifactsActivity WithSourceId(string sourceId)
+        public StubExportActivity WithSourceId(string sourceId)
         {
             _sourceId = sourceId ?? throw new ArgumentNullException(nameof(sourceId));
 
             return this;
         }
         
-        public StubDockerExportArtifactsActivity WithImage(string imageName)
+        public StubExportActivity WithImage(string imageName)
         {
             _image = imageName ?? throw new ArgumentNullException(nameof(imageName));
             
             return this;
         }
 
+        public StubExportActivity WithTargetFolder(string targetFolder)
+        {
+            _targetFolder = targetFolder ?? throw new ArgumentNullException(nameof(targetFolder));
+
+            return this;
+        }
+
         public IAction Build()
         {
-            return new StubDockerExportActivityAction
+            return new StubExportActivityAction
             {
                 Image = _image,
                 Mounts = new[]
@@ -43,7 +50,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
                     {
                         Type = "volume",
                         Source = _sourceId,
-                        Target = "/artifacts"
+                        Target = _targetFolder
                     }
                 },
                 Resource = ReadBytesFromResource(_resourceName)

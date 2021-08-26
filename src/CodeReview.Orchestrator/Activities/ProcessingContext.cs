@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
@@ -9,11 +12,10 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly string _manifestFilePath;
         private readonly IContainerService _containerService;
         private readonly IPathService _pathService;
+        private readonly Dictionary<string, Volume> _volumes = new(StringComparer.OrdinalIgnoreCase);
 
-        public string SourceCodeVolumeId { get; private set; }
-        public string ArtifactsVolumeId { get; private set; }
-        public string ImportsVolumeId { get; private set; }
-
+        public IEnumerable<Volume> Volumes => _volumes.Values;
+        
         public ProcessingContext(
             string manifestFilePath,
             IContainerService containerService,
@@ -27,17 +29,21 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(ICollection<Volume> volumes)
         {
-            SourceCodeVolumeId = await _containerService.CreateVolumeAsync("src");
-            ArtifactsVolumeId = await _containerService.CreateVolumeAsync("art");
-            ImportsVolumeId = await _containerService.CreateVolumeAsync("imp");
+            if (volumes == null) throw new ArgumentNullException(nameof(volumes));
+            
+            foreach (var volume in volumes)
+            {
+                var volumeId = await _containerService.CreateVolumeAsync(volume.Name).ConfigureAwait(false);
+                
+                _volumes.Add(volumeId, volume);
+            }
         }
 
         public string ResolvePath(string relativeOrAbsolutePath)
         {
-            if (string.IsNullOrWhiteSpace(relativeOrAbsolutePath))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeOrAbsolutePath));
+            if (string.IsNullOrWhiteSpace(relativeOrAbsolutePath)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeOrAbsolutePath));
 
             if (_pathService.IsPathRooted(relativeOrAbsolutePath))
                 return relativeOrAbsolutePath;
@@ -48,20 +54,21 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             return  _pathService.GetFullPath(importsFolderPath);
         }
 
+        public string ResolveVolumeId(string volumeName)
+        {
+            if (string.IsNullOrWhiteSpace(volumeName)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumeName));
+            
+            return _volumes.Single(p => p.Value.Name.Equals(volumeName, StringComparison.OrdinalIgnoreCase)).Key;
+        }
+
         public async Task CleanUpVolumesAsync()
         {
-            if (!string.IsNullOrEmpty(SourceCodeVolumeId))
-                await _containerService.RemoveVolumeAsync(SourceCodeVolumeId);
-
-            if (!string.IsNullOrEmpty(ArtifactsVolumeId))
-                await _containerService.RemoveVolumeAsync(ArtifactsVolumeId);
-
-            if (!string.IsNullOrEmpty(ImportsVolumeId))
-                await _containerService.RemoveVolumeAsync(ImportsVolumeId);
-
-            SourceCodeVolumeId = null;
-            ArtifactsVolumeId = null;
-            ImportsVolumeId = null;
+            foreach (var (volumeId, _) in _volumes)
+            {
+                await _containerService.RemoveVolumeAsync(volumeId).ConfigureAwait(false);
+            }
+            
+            _volumes.Clear();
         }
 
         public async ValueTask DisposeAsync()

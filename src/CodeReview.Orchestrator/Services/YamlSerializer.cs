@@ -23,10 +23,10 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             if (person == null) 
                 throw new ArgumentNullException(nameof(person));
-
-
+            
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
                 .Build();
 
             return serializer.Serialize(person);

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Net;
-using GodelTech.StoryLine;
+using CodeReview.Orchestrator.SubsystemTests.Actions.Wiremock;
 using GodelTech.StoryLine.Contracts;
 using GodelTech.StoryLine.Wiremock.Actions;
 using GodelTech.StoryLine.Wiremock.Builders;
 using Newtonsoft.Json;
+using Scenario = GodelTech.StoryLine.Scenario;
 
-namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
+namespace CodeReview.Orchestrator.SubsystemTests.Actions.Activities
 {
-    public class StubDockerExportActivityAction : IAction
+    public class StubExportActivityAction : IAction
     {
         public byte[] Resource { private get; init; }
         public object Mounts { private get; init; }
@@ -26,7 +27,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
             
             Scenario.New()
                 .When()
-                .Performs<MockHttpRequest>(b => b
+                .Performs<MockScenarioHttpRequest>(b => b
                     .Request(req => req
                         .UrlPath("/containers/create")
                         .Body()
@@ -43,7 +44,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
                         .Header("X-Docker-Container-Path-Stat", string.Empty)
                         .BinaryBody(Resource)
                         .Status(HttpStatusCode.OK)))
-                .Performs<MockHttpRequest>(b => b
+                .Performs<MockScenarioHttpRequest>(b => b
                     .Request(req => req
                         .UrlPath($"/containers/{containerId}")
                         .Method("DELETE"))

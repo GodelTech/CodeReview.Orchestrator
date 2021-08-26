@@ -1,0 +1,27 @@
+volumes:
+  sources:
+    readOnly: false
+    targetFolder: /src
+    folderToImport: ./imports
+variables:
+  srcPath: /src
+activities:
+  git:
+    image: godeltech/codereview.tools.gitprovider
+    environment:
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
+  cloc:
+    image: aldanial/cloc
+    requirements:
+      features:
+        - feature1
+      os: Linux
+    volumes:
+      sources: 
+        targetFolder: /source
+    command:
+      - --by-file
+      - --report-file=/artifacts/stat.cloc.json
+      - --json
+      - .

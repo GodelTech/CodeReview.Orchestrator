@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using GodelTech.CodeReview.Orchestrator.Model;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public interface IProcessingContext : IAsyncDisposable
     {
-        string SourceCodeVolumeId { get; }
-        string ArtifactsVolumeId { get; }
-        string ImportsVolumeId { get; }
-        Task InitializeAsync();
+        public IEnumerable<Volume> Volumes { get; }
 
+        Task InitializeAsync(ICollection<Volume> volumes);
         string ResolvePath(string relativeOrAbsolutePath);
+        string ResolveVolumeId(string volumeName);
         Task CleanUpVolumesAsync();
     }
 }

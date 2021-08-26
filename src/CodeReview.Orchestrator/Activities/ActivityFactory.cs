@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
 using Microsoft.Extensions.Logging;
@@ -7,66 +9,77 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 {
     public class ActivityFactory : IActivityFactory
     {
-        private readonly IDockerEngineContext _engineContext;
-        private readonly IContainerService _containerService;
+        private readonly IDockerVolumeExporter _dockerVolumeExporter;
+        private readonly IDockerVolumeImporter _dockerVolumeImporter;
         private readonly IActivityExecutor _activityExecutor;
-        private readonly ITarArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly IPathService _pathService;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly IPathService _pathService;
 
         public ActivityFactory(
-            IDockerEngineContext engineContext,
-            IContainerService containerService,
-            IActivityExecutor activityExecutor,
-            ITarArchiveService archiveService,
+            IDockerVolumeExporter dockerVolumeExporter, 
+            IDockerVolumeImporter dockerVolumeImporter, 
+            IActivityExecutor activityExecutor, 
             IDirectoryService directoryService,
-            IPathService pathService,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory, 
+            IPathService pathService)
         {
-            _engineContext = engineContext ?? throw new ArgumentNullException(nameof(engineContext));
-            _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
+            _dockerVolumeExporter = dockerVolumeExporter ?? throw new ArgumentNullException(nameof(dockerVolumeExporter));
+            _dockerVolumeImporter = dockerVolumeImporter ?? throw new ArgumentNullException(nameof(dockerVolumeImporter));
             _activityExecutor = activityExecutor ?? throw new ArgumentNullException(nameof(activityExecutor));
-            _archiveService = archiveService ?? throw new ArgumentNullException(nameof(archiveService));
             _directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
-            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
         }
 
         public IActivity Create(AnalysisManifest manifest)
         {
-            if (manifest == null) 
-                throw new ArgumentNullException(nameof(manifest));
+            if (manifest == null) throw new ArgumentNullException(nameof(manifest));
 
-            return new CompositeActivity(
-                new ImportDataActivity(
-                    manifest.Imports,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _loggerFactory.CreateLogger<ImportDataActivity>()),
-                new ImportSourcesActivity(
-                    manifest.Sources,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _loggerFactory.CreateLogger<ImportSourcesActivity>()),
-                new RunProcessorsActivity(
-                    manifest.Activities, 
-                    _activityExecutor,
-                    _loggerFactory.CreateLogger<RunProcessorsActivity>()),
-                new ExportArtifactsActivity(
-                    manifest.Artifacts,
-                    _engineContext,
-                    _containerService,
-                    _archiveService,
-                    _directoryService,
-                    _pathService,
-                    _loggerFactory.CreateLogger<ExportArtifactsActivity>())
-                );
+            var activities = Enumerable.Empty<IActivity>()
+                .Concat(CreateImportActivities(manifest))
+                .Concat(CreateRunProcessorsActivity(manifest))
+                .Concat(CreateExportActivities(manifest))
+                .ToArray();
+            
+            return new CompositeActivity(activities);
+        }
 
+        private IEnumerable<IActivity> CreateImportActivities(AnalysisManifest manifest)
+        {
+            return manifest.Volumes
+                .ListVolumesToImport()
+                .Select(volume =>
+                {
+                    var logger = _loggerFactory.CreateLogger<ImportFolderActivity>();
+
+                    return new ImportFolderActivity(_dockerVolumeImporter, _directoryService, logger)
+                    {
+                        Volume = volume
+                    };
+                });
+        }
+
+        private IEnumerable<IActivity> CreateRunProcessorsActivity(AnalysisManifest manifest)
+        {
+            var logger = _loggerFactory.CreateLogger<RunProcessorsActivity>();
+
+            yield return new RunProcessorsActivity(manifest.Activities, _activityExecutor, logger);
+        }
+        
+        private IEnumerable<IActivity> CreateExportActivities(AnalysisManifest manifest)
+        {
+            return manifest.Volumes
+                .ListVolumesToExport()
+                .Select(volume =>
+                {
+                    var logger = _loggerFactory.CreateLogger<ExportFolderActivity>();
+
+                    return new ExportFolderActivity(_dockerVolumeExporter, _directoryService, _pathService, logger)
+                    {
+                        Volume = volume
+                    };
+                });
         }
     }
 }

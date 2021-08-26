@@ -3,9 +3,9 @@ using GodelTech.StoryLine.Contracts;
 
 namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
 {
-    public class StubDockerRemoveVolume : IActionBuilder
+    public class StubDockerRemoveVolume : WiremockScenarioActionBuilder<StubDockerRemoveVolume>
     {
-        private string _volumeId;
+        private string _volumeId; 
 
         public StubDockerRemoveVolume WithVolumeId(string volumeId)
         {
@@ -14,11 +14,12 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Docker
             return this;
         }
         
-        public IAction Build()
+        public override IAction Build()
         {
             return new StubDockerRemoveVolumeAction
             {
-                VolumeId = _volumeId
+                VolumeId = _volumeId,
+                NewWiremockState = NewWiremockState
             };
         }
     }

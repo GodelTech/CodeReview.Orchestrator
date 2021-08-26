@@ -4,3 +4,9 @@ engines:
     os: Linux
     url: http://localhost:19257/
     workerImage: alpine
+  remote:
+    os: Linux
+    url: http://localhost:19257/
+    workerImage: alpine
+    features:
+      - feature1

@@ -1,10 +1,16 @@
-imports:
-  folderPath: ./imports
-sources:
-  folderPath: ./src
-artifacts:
-  folderPath: ./artifacts
-  exportOnCompletion: true
+volumes:
+  imports:
+    readOnly: false
+    targetFolder: /imports
+    folderToImport: ./imports
+  sources:
+    readOnly: true
+    targetFolder: /src
+    folderToImport: ./src
+  artifacts:
+    readOnly: false
+    targetFolder: /artifacts
+    folderToOutput: ./artifacts
 variables:
   MY_VAR_1: Value1
   MY_VAR_2: Value2
@@ -15,10 +21,9 @@ activities:
       MY_VAR_1: Value1
       MY_VAR_2: Value2
     volumes:
-      useWindowsDefaults: false
-      sources: /src
-      artifacts: /artifacts
-      imports: /imports
+      sources:
+        readOnly: true
+        targetFolder: /sources
     settings:
       waitTimeoutSeconds: 3000
     requirements:
@@ -34,10 +39,15 @@ activities:
       MY_VAR_1: Value1
       MY_VAR_2: Value2
     volumes:
-      useWindowsDefaults: false
-      sources: /src
-      artifacts: /artifacts
-      imports: /imports
+      sources:
+        readOnly: true
+        targetFolder: C:\src
+      imports:
+        readOnly: true
+        targetFolder: C:\imports
+      artifacts:
+        readOnly: true
+        targetFolder: C:\artifacts
     settings:
       waitTimeoutSeconds: 3000
     requirements:
@@ -53,14 +63,9 @@ activities:
     environment:
       MY_VAR_1: Value1
       MY_VAR_2: Value2
-    volumes:
-      useWindowsDefaults: true
-      sources: C:\src
-      artifacts: C:\artifacts
-      imports: C:\imports
+    volumes: {}
     settings:
       waitTimeoutSeconds: 3000
-    requirements: 
     command:
     - mkdir
     - /mydir

@@ -1,5 +1,14 @@
-artifacts:
-  exportOnCompletion: true
+volumes:
+  artifacts:
+    folderToOutput: ./artifacts
+    targetFolder: /artifacts
+    readOnly: false
+  imports:
+    targetFolder: /imports
+    folderToImport: ./imports
+  sources:
+    targetFolder: /src
+    readOnly: false
 variables: 
   srcPath: /src
 activities:
@@ -9,14 +18,17 @@ activities:
       GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
       GIT_BRANCH: main
     volumes:
-      sources: ${var.srcPath}
+      sources:
+        targetFolder: ${var.srcPath}
   resharper:
     image: godeltech/codereview.analyzers.inspectcode
     environment:
       SOLUTION_FILE_PATH: /src/CodeReview.Orchestrator.sln
     volumes:
-      sources: ${var.srcPath}
-      artifacts: /artifacts
+      sources:
+        targetFolder: ${var.srcPath}
+      artifacts:
+        targetFolder: /artifacts
   resharper-converter:
     image: godeltech/codereview.file-converter
     command:
@@ -25,16 +37,26 @@ activities:
     - /artifacts/resharper-result.zip
     - --folder
     - /artifacts/result.xml
-  evaluator:
+  evaluator-import-issues:
     image: godeltech/codereview.evaluator
     command:
-    - evaluate
-    - --output
-    - /artifacts/evaluation-result.json
-    - --manifest
-    - /imports/manifest.yaml
-    - --folder
-    - /artifacts/resharper-result.zip
+      - import-issues
+      - --output
+      - /artifacts/result.db
+      - --issues
+      - /artifacts/resharper-result.zip
+      - --filter
+      - /imports/filter.yaml
+  evaluator-evaluate:
+    image: godeltech/codereview.evaluator
+    command:
+      - evaluate
+      - --output
+      - /artifacts/evaluation-result.json
+      - --manifest
+      - /imports/manifest.yaml
+      - --db
+      - /artifacts/result.db
   templater:
     image: godeltech/codereview.template-renderer
     command:

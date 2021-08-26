@@ -120,6 +120,8 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddTransient<ICreateDockerEngineCollectionManifestCommand, CreateDockerEngineCollectionManifestCommand>();
             serviceProvider.AddTransient<IOutputFolderPathCalculator, OutputFolderPathCalculator>();
             serviceProvider.AddTransient<IExtractMetadataCommand, ExtractMetadataCommand>();
+            serviceProvider.AddTransient<IDockerVolumeExporter, DockerVolumeExporter>();
+            serviceProvider.AddTransient<IDockerVolumeImporter, DockerVolumeImporter>();
 
             return serviceProvider.BuildServiceProvider();
         }

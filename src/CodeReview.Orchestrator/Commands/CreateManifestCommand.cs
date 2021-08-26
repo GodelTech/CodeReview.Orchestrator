@@ -26,20 +26,26 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
 
             var manifest = new AnalysisManifest
             {
-                Imports = new ()
+                Volumes = new()
                 {
-                    FolderPath = "./imports"
-                },
-                
-                Sources = new ()
-                {
-                    FolderPath = "./src"
-                },
-                
-                Artifacts = new ()
-                {
-                    FolderPath = "./artifacts",
-                    ExportOnCompletion = true
+                    ["imports"] = new()
+                    {
+                        ReadOnly = false,
+                        TargetFolder = "/imports",
+                        FolderToImport = "./imports"
+                    },
+                    ["sources"] = new()
+                    {
+                        ReadOnly = true,
+                        TargetFolder = "/src",
+                        FolderToImport = "./src"
+                    },
+                    ["artifacts"] = new()
+                    {
+                        ReadOnly = false,
+                        TargetFolder = "/artifacts",
+                        FolderToOutput = "./artifacts"
+                    }
                 },
                 
                 Variables = new()
@@ -57,16 +63,16 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/jetbrains",
-                        Volumes = new()
-                        {
-                            UseWindowsDefaults = false,
-                            Artifacts = "/artifacts",
-                            Sources = "/src",
-                            Imports = "/imports"
-                        },
                         Settings = new()
                         {
                             WaitTimeoutSeconds = 3000
+                        },
+                        Volumes = new()
+                        {
+                            ["sources"] = new()
+                            {
+                                TargetFolder = "/sources"
+                            }
                         },
                         Requirements = new()
                         {
@@ -90,12 +96,6 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/jetbrains",
-                        Volumes = new()
-                        {
-                            Artifacts = "/artifacts",
-                            Sources = "/src",
-                            Imports = "/imports"
-                        },
                         Settings = new()
                         {
                             WaitTimeoutSeconds = 3000
@@ -109,7 +109,12 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                                 "feature3"
                             }
                         },
-
+                        Volumes = new()
+                        {
+                            ["sources"] = new() { TargetFolder = "C:\\src" },
+                            ["imports"] = new() { TargetFolder = "C:\\imports" },
+                            ["artifacts"] = new() { TargetFolder = "C:\\artifacts" }
+                        },
                         Command = new[]
                         {
                             "mkdir",
@@ -124,10 +129,6 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
                             ["MY_VAR_2"] = "Value2"
                         },
                         Image = "dragon/roslyn",
-                        Volumes = new()
-                        {
-                            UseWindowsDefaults = true
-                        },
                         Settings = new()
                         {
                             WaitTimeoutSeconds = 3000

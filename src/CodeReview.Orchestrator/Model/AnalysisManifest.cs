@@ -5,19 +5,12 @@ namespace GodelTech.CodeReview.Orchestrator.Model
 {
     public class AnalysisManifest
     {
-        [Required]
-        public ImportedDataSettings Imports { get; set; } = new();
-
-        [Required]
-        public SourcesDataSettings Sources { get; set; } = new();
+        public VolumeCollection Volumes { get; set; } = new();
 
         [Required] 
-        public ArtifactsSettings Artifacts { get; set; } = new();
-
-        [Required]
         public Dictionary<string, string> Variables { get; set; } = new();
 
-        [Required]
+        [Required] 
         public Dictionary<string, ActivityManifest> Activities { get; set; } = new();
     }
 }

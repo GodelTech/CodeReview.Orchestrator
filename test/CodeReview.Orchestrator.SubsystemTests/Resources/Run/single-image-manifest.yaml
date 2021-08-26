@@ -1,0 +1,21 @@
+﻿volumes:
+  artifacts:
+    readOnly: false
+    targetFolder: /artifacts
+    folderToOutput: ./artifacts
+  sources:
+    readOnly: false
+    targetFolder: /src
+    folderToImport: ./imports
+  imports:
+    readOnly: true
+    targetFolder: /imports
+    folderToImport: ./imports
+variables:
+  srcPath: /src
+activities:
+  git:
+    image: godeltech/codereview.tools.gitprovider
+    environment:
+      GIT_REPOSITORY_URL: https://github.com/GodelTech/CodeReview.Orchestrator.git
+      GIT_BRANCH: main
