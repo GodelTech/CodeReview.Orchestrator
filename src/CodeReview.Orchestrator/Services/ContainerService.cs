@@ -78,13 +78,14 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             await client.Images.CreateImageAsync(parameters, null, new NullProgress());
         }
 
-        public Task<string> CreateContainerAsync(string imageName, params MountedVolume[] volumes)
-            => CreateContainerAsync(imageName, Array.Empty<string>(), ImmutableDictionary<string, string>.Empty, volumes);
+        public Task<string> CreateContainerAsync(string imageName, string resourceLabel = null, params MountedVolume[] volumes)
+            => CreateContainerAsync(imageName, Array.Empty<string>(), ImmutableDictionary<string, string>.Empty, resourceLabel, volumes);
         
         public async Task<string> CreateContainerAsync(
             string imageName,
             string[] commandLineArgs,
             IReadOnlyDictionary<string, string> envVariables,
+            string resourceLabel = null,
             params MountedVolume[] volumes)
         {
             if (volumes == null)
@@ -105,7 +106,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             using var client = _dockerClientFactory.Create();
 
-            var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
+            var parameters = new CreateContainerParameters
             {
                 Image = imageName,
                 Env = (envVariables ?? ImmutableDictionary<string, string>.Empty).Select(x => x.Key + "=" + x.Value)
@@ -114,8 +115,14 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 {
                     Mounts = mounts
                 },
-                Cmd = commandLineArgs
-            });
+                Cmd = commandLineArgs,
+                Labels = new Dictionary<string, string>()
+            };
+
+            if (!string.IsNullOrWhiteSpace(resourceLabel))
+                parameters.Labels[resourceLabel] = string.Empty;
+            
+            var createResult = await client.Containers.CreateContainerAsync(parameters);
 
             return createResult.ID;
         }
@@ -249,17 +256,25 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             }
         }
 
-        public async Task<string> CreateVolumeAsync(string volumePrefix)
+        public async Task<string> CreateVolumeAsync(string volumePrefix, string resourceLabel = null)
         {
             if (string.IsNullOrWhiteSpace(volumePrefix))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumePrefix));
 
             using var client = _dockerClientFactory.Create();
-            
-            var result = await client.Volumes.CreateAsync(new VolumesCreateParameters
+
+            var parameters = new VolumesCreateParameters
             {
-                Name = _nameFactory.CreateVolumeName(volumePrefix)
-            });
+                Name = _nameFactory.CreateVolumeName(volumePrefix),
+                Labels = new Dictionary<string, string>()
+            };
+            
+            if (!string.IsNullOrWhiteSpace(resourceLabel))
+            {
+                parameters.Labels[resourceLabel] = string.Empty;
+            }
+            
+            var result = await client.Volumes.CreateAsync(parameters);
 
             return result.Name;
         }

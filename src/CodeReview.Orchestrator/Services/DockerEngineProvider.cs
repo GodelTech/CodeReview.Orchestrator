@@ -54,7 +54,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     WorkerImage = engineManifest.WorkerImage,
                     IsDefault = manifest.DefaultEngine.Equals(name, StringComparison.OrdinalIgnoreCase),
                     Name = name,
-                    Url = engineManifest.Url
+                    Url = engineManifest.Url,
+                    ResourceLabel = manifest.ResourceLabel
                 });
             }
             
