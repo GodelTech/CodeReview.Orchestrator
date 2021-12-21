@@ -54,7 +54,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             var mountedVolumes = ResolveMountedVolumes(context, volumes).ToArray();
 
-            return await _containerService.CreateContainerAsync(_dockerEngineContext.Engine.WorkerImage, _dockerEngineContext.Engine.ResourceLabel, mountedVolumes);
+            return await _containerService.CreateContainerAsync(_dockerEngineContext.Engine.WorkerImage, mountedVolumes);
         }
 
         private static IEnumerable<MountedVolume> ResolveMountedVolumes(IProcessingContext context, ICollection<Volume> volumes)

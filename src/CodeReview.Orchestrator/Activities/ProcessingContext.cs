@@ -38,7 +38,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             
             foreach (var volume in volumes)
             {
-                var volumeId = await _containerService.CreateVolumeAsync(volume.Name, _dockerEngineContext.Engine.ResourceLabel).ConfigureAwait(false);
+                var volumeId = await _containerService.CreateVolumeAsync(volume.Name).ConfigureAwait(false);
                 
                 _volumes.Add(volumeId, volume);
             }

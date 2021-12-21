@@ -45,7 +45,6 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 manifest.Image,
                 manifest.Command,
                 manifest.Environment,
-                _engineContext.Engine.ResourceLabel,
                 mounts);
             _logger.LogInformation("Container created.");
 

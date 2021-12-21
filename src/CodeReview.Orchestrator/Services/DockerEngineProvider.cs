@@ -55,7 +55,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     IsDefault = manifest.DefaultEngine.Equals(name, StringComparison.OrdinalIgnoreCase),
                     Name = name,
                     Url = engineManifest.Url,
-                    ResourceLabel = manifest.ResourceLabel
+                    ResourceLabel = engineManifest.ResourceLabel
                 });
             }
             

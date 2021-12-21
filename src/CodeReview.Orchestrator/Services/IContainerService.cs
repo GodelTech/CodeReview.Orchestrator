@@ -6,10 +6,10 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface IContainerService
     {
-        Task<string> CreateVolumeAsync(string volumePrefix, string resourceLabel = null);
+        Task<string> CreateVolumeAsync(string volumePrefix);
         Task RemoveVolumeAsync(string volumeId);
-        Task<string> CreateContainerAsync(string imageName, string resourceLabel = null, params MountedVolume[] volumes);
-        Task<string> CreateContainerAsync(string imageName, string[] commandLineArgs, IReadOnlyDictionary<string, string> envVariables, string resourceLabel = null, params MountedVolume[] volumes);
+        Task<string> CreateContainerAsync(string imageName, params MountedVolume[] volumes);
+        Task<string> CreateContainerAsync(string imageName, string[] commandLineArgs, IReadOnlyDictionary<string, string> envVariables, params MountedVolume[] volumes);
         Task StartContainerAsync(string containerId);
         Task StopContainerAsync(string containerId, int waitBeforeKillSeconds = 30);
         Task RemoveContainerAsync(string containerId, bool force = false);
