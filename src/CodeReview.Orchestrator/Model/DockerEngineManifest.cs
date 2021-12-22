@@ -12,6 +12,8 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         [Required]
         [MaxLength(Constants.MaxDockerImageNameLength)]
         public string WorkerImage { get; set; }
+        
+        public string ResourceLabel { get; set; }
 
         public string[] Features { get; set; }
     }

@@ -19,13 +19,16 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         }
 
         private readonly IDockerClientFactory _dockerClientFactory;
+        private readonly IDockerEngineContext _dockerEngineContext;
         private readonly INameFactory _nameFactory;
 
         public ContainerService(
             IDockerClientFactory dockerClientFactory,
+            IDockerEngineContext dockerEngineContext,
             INameFactory nameFactory)
         {
             _dockerClientFactory = dockerClientFactory ?? throw new ArgumentNullException(nameof(dockerClientFactory));
+            _dockerEngineContext = dockerEngineContext ?? throw new ArgumentNullException(nameof(dockerEngineContext));
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
         }
 
@@ -105,7 +108,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             using var client = _dockerClientFactory.Create();
 
-            var createResult = await client.Containers.CreateContainerAsync(new CreateContainerParameters
+            var parameters = new CreateContainerParameters
             {
                 Image = imageName,
                 Env = (envVariables ?? ImmutableDictionary<string, string>.Empty).Select(x => x.Key + "=" + x.Value)
@@ -114,8 +117,15 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 {
                     Mounts = mounts
                 },
-                Cmd = commandLineArgs
-            });
+                Cmd = commandLineArgs,
+                Labels = new Dictionary<string, string>()
+            };
+
+            var resourceLabel = _dockerEngineContext.Engine.ResourceLabel;
+            if (!string.IsNullOrWhiteSpace(resourceLabel))
+                parameters.Labels[resourceLabel] = string.Empty;
+            
+            var createResult = await client.Containers.CreateContainerAsync(parameters);
 
             return createResult.ID;
         }
@@ -255,11 +265,18 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(volumePrefix));
 
             using var client = _dockerClientFactory.Create();
-            
-            var result = await client.Volumes.CreateAsync(new VolumesCreateParameters
+
+            var parameters = new VolumesCreateParameters
             {
-                Name = _nameFactory.CreateVolumeName(volumePrefix)
-            });
+                Name = _nameFactory.CreateVolumeName(volumePrefix),
+                Labels = new Dictionary<string, string>()
+            };
+            
+            var resourceLabel = _dockerEngineContext.Engine.ResourceLabel;
+            if (!string.IsNullOrWhiteSpace(resourceLabel)) 
+                parameters.Labels[resourceLabel] = string.Empty;
+
+            var result = await client.Volumes.CreateAsync(parameters);
 
             return result.Name;
         }

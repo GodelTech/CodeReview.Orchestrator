@@ -12,6 +12,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         private readonly string _manifestFilePath;
         private readonly IContainerService _containerService;
         private readonly IPathService _pathService;
+        private readonly IDockerEngineContext _dockerEngineContext;
         private readonly Dictionary<string, Volume> _volumes = new(StringComparer.OrdinalIgnoreCase);
 
         public IEnumerable<Volume> Volumes => _volumes.Values;
@@ -19,7 +20,8 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
         public ProcessingContext(
             string manifestFilePath,
             IContainerService containerService,
-            IPathService pathService)
+            IPathService pathService,
+            IDockerEngineContext dockerEngineContext)
         {
             if (string.IsNullOrWhiteSpace(manifestFilePath))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(manifestFilePath));
@@ -27,6 +29,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             _manifestFilePath = manifestFilePath;
             _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
+            _dockerEngineContext = dockerEngineContext ?? throw new ArgumentNullException(nameof(dockerEngineContext));
         }
 
         public async Task InitializeAsync(ICollection<Volume> volumes)
