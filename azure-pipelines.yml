@@ -3,6 +3,12 @@ trigger:
 
 pr: none
 
+resources:
+  - repo: self
+
+pool:
+  vmImage: ubuntu-latest
+
 variables:
   repository: 'godeltech/codereview.orchestrator'
   foldername: 'CodeReview.Orchestrator'
