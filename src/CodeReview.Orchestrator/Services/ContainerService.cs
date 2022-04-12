@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
@@ -20,16 +23,19 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         private readonly IDockerClientFactory _dockerClientFactory;
         private readonly IDockerEngineContext _dockerEngineContext;
+        private readonly ILogger<ContainerService> _logger;
         private readonly INameFactory _nameFactory;
 
         public ContainerService(
             IDockerClientFactory dockerClientFactory,
             IDockerEngineContext dockerEngineContext,
+            ILogger<ContainerService> logger,
             INameFactory nameFactory)
         {
             _dockerClientFactory = dockerClientFactory ?? throw new ArgumentNullException(nameof(dockerClientFactory));
             _dockerEngineContext = dockerEngineContext ?? throw new ArgumentNullException(nameof(dockerEngineContext));
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<bool> ImageExists(string imageName)
@@ -224,39 +230,21 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             });
         }
 
-        public async Task<ContainerLogs> GetContainerLogsAsync(string containerId)
+        public async Task AttachToContainerStream(string containerId)
         {
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
             using var client = _dockerClientFactory.Create();
-            var contentStream = await client.Containers.GetContainerLogsAsync(containerId, false,
-                new ContainerLogsParameters
-                {
-                    ShowStderr = true,
-                    ShowStdout = true,
-                    Timestamps = false
-                });
 
-            using (contentStream)
-            await using (var stdOutStream = new MemoryStream())
-            await using (var stdInStream = new MemoryStream())
-            await using (var stdErrStream = new MemoryStream())
+            using var stream = await client.Containers.AttachContainerAsync(containerId, false, new ContainerAttachParameters
             {
-                await contentStream.CopyOutputToAsync(stdInStream, stdOutStream, stdErrStream, default);
+                Stdout = true,
+                Stderr = true,
+                Stream = true
+            });
 
-                stdOutStream.Position = 0;
-
-                using (var stdOutReader = new StreamReader(stdOutStream))
-                using (var stdErrReader = new StreamReader(stdErrStream))
-                {
-                    return new ContainerLogs
-                    {
-                        StdErr = await stdErrReader.ReadToEndAsync(),
-                        StdOut = await stdOutReader.ReadToEndAsync()
-                    };
-                }
-            }
+            await LogContainerStream(containerId, stream);
         }
 
         public async Task<string> CreateVolumeAsync(string volumePrefix)
@@ -315,6 +303,42 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             catch (DockerContainerNotFoundException)
             {
                 return null;
+            }
+        }
+
+        private async Task LogContainerStream(string containerId, MultiplexedStream stream)
+        {
+            var buffer = ArrayPool<byte>.Shared.Rent(81920);
+
+            try
+            {
+                while (true)
+                {
+                    var result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None).ConfigureAwait(false);
+                    
+                    if (result.EOF)
+                        return;
+
+                    var dockerLog = Encoding.Default.GetString(buffer, 0, result.Count);
+                    var dockerLogs = dockerLog.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var log in dockerLogs)
+                    {
+                        switch (result.Target)
+                        {
+                            case MultiplexedStream.TargetStream.StandardOut:
+                                _logger.LogInformation("Container={containerId} Stdout: {stdOut}", containerId, log);
+                                break;
+                            case MultiplexedStream.TargetStream.StandardError:
+                                _logger.LogError("Container={containerId} Stderr: {stdOut}", containerId, log);
+                                break;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
     }
