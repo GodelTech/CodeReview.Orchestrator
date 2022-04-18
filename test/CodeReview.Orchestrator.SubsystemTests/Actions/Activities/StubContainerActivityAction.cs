@@ -48,16 +48,8 @@ namespace CodeReview.Orchestrator.SubsystemTests.Actions.Activities
                     
                     .Performs<MockHttpRequest>(b => b
                         .Request(req => req
-                            .UrlPath($"/containers/{containerId}/wait")
+                            .UrlPath($"/containers/{containerId}/attach")
                             .Method("POST"))
-                        .Response(res => res
-                            .JsonObjectBody(CreateWaitResponseBody(), jsonSettings)
-                            .Status(HttpStatusCode.OK)))
-                    
-                    .Performs<MockHttpRequest>(b => b
-                        .Request(req => req
-                            .UrlPath($"/containers/{containerId}/logs")
-                            .Method("GET"))
                         .Response(res => res
                             .BinaryBody(Array.Empty<byte>())
                             .Status(HttpStatusCode.OK)))

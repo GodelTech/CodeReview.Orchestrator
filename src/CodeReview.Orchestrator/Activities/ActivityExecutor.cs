@@ -55,31 +55,25 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 _logger.LogInformation("Container started. ContainerId = {containerId}", containerId);
 
                 _logger.LogInformation("Waiting for container. ContainerId = {containerId}...", containerId);
-                await _containerService.WaitContainer(containerId, manifest.Settings.WaitTimeoutSeconds);
-                _logger.LogInformation("Container exited. ContainerId = {containerId}", containerId);
 
-                var logDetails = new ContainerLogs();
                 if (readLogs)
-                    logDetails = await _containerService.GetContainerLogsAsync(containerId);
+                    await _containerService.AttachToContainerStream(containerId);
+                else
+                    await _containerService.WaitContainer(containerId, manifest.Settings.WaitTimeoutSeconds);
+
+                _logger.LogInformation("Container exited. ContainerId = {containerId}", containerId);
 
                 var info = await _containerService.GetContainerInfo(containerId);
                 var exitCode = info.ExitCode;
 
-                _logger.LogInformation("Container={containerId}, ExitCode={exitCode}", containerId, exitCode);
-                _logger.LogInformation("Container={containerId} Stdout: {stdOut}", containerId, logDetails.StdOut);
-                if (!string.IsNullOrWhiteSpace(logDetails.StdErr))
-                    _logger.LogError("Container={containerId} Stderr: {stdErr}", containerId, logDetails.StdErr);
-
                 return new ExecutionResult
                 {
-                    StdErr = logDetails.StdErr,
-                    StdOut = logDetails.StdOut,
                     ExitCode = exitCode
                 };
             } 
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to run container.");
+                _logger.LogError(ex, $"Failed to run container. {ex.Message}");
                 throw;
             }
             finally
