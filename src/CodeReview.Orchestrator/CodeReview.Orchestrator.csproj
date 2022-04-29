@@ -5,8 +5,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>GodelTech.CodeReview.Orchestrator</RootNamespace>
 
-    <PublishTrimmed>true</PublishTrimmed>
-
     <!-- Package details -->
     <PackageId>GodelTech.CodeReview.Orchestrator</PackageId>
     <PackageTags>.netcore netcore .net codereview</PackageTags>
