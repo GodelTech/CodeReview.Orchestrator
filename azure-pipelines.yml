@@ -22,31 +22,31 @@ stages:
   - job: Build
     displayName: Build
     steps:
-          - task: gitversion/setup@0
-            displayName: Setup GitVersion
-            inputs:
-             versionSpec: '5.x'
-          - script: pwd && ls
-          - task: gitversion/execute@0
-            displayName: Execute GitVersion
-          - task: DotNetCoreCLI@2
-            displayName: Pack a nuget package
-            inputs:
-              command: 'pack'
-              packagesToPack: './src/$(foldername)/$(srcproject)'
-              configuration: 'Release'
-              packDirectory: '$(artifactstagingdirectory)'
-              versioningScheme: 'byEnvVar'
-              versionEnvVar: 'BUILD_NUMBER'
-            env:
-              BUILD_NUMBER: $(Build.BuildNumber)
-          - task: NuGetCommand@2
-            displayName: Nuget push
-            inputs:
-              command: push
-              packagesToPush: ./$(artifactstagingdirectory)/*.nupkg
-              nuGetFeedType: external
-              publishFeedCredentials: NuGet
+          # - task: gitversion/setup@0
+          #   displayName: Setup GitVersion
+          #   inputs:
+          #    versionSpec: '5.x'
+          # - script: pwd && ls
+          # - task: gitversion/execute@0
+          #   displayName: Execute GitVersion
+          # - task: DotNetCoreCLI@2
+          #   displayName: Pack a nuget package
+          #   inputs:
+          #     command: 'pack'
+          #     packagesToPack: './src/$(foldername)/$(srcproject)'
+          #     configuration: 'Release'
+          #     packDirectory: '$(artifactstagingdirectory)'
+          #     versioningScheme: 'byEnvVar'
+          #     versionEnvVar: 'BUILD_NUMBER'
+          #   env:
+          #     BUILD_NUMBER: $(Build.BuildNumber)
+          # - task: NuGetCommand@2
+          #   displayName: Nuget push
+          #   inputs:
+          #     command: push
+          #     packagesToPush: ./$(artifactstagingdirectory)/*.nupkg
+          #     nuGetFeedType: external
+          #     publishFeedCredentials: NuGet
           - task: Docker@2
             displayName: Build and Push an image
             inputs:
