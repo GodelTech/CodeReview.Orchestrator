@@ -21,6 +21,7 @@ namespace GodelTech.CodeReview.Orchestrator.Commands
         {
             if (options == null) 
                 throw new ArgumentNullException(nameof(options));
+
             if (string.IsNullOrWhiteSpace(options.File))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(options.File));
 
