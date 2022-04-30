@@ -5,7 +5,7 @@ COPY ["CodeReview.Orchestrator/*.csproj", "CodeReview.Orchestrator/"]
 RUN dotnet restore "CodeReview.Orchestrator/CodeReview.Orchestrator.csproj" -r linux-musl-x64 --force
 
 COPY CodeReview.Orchestrator/. ./CodeReview.Orchestrator/
-RUN dotnet publish ./CodeReview.Orchestrator/CodeReview.Orchestrator.csproj -c Release -r linux-musl-x64 -o ./CodeReview.Orchestrator/out
+RUN dotnet publish ./CodeReview.Orchestrator/CodeReview.Orchestrator.csproj -c Release -r linux-musl-x64 -o ./CodeReview.Orchestrator/out /p:PublishTrimmed=true
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine3.15 AS runtime
 
