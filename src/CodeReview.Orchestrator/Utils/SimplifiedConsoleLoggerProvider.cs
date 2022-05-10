@@ -17,6 +17,8 @@ namespace GodelTech.CodeReview.Orchestrator.Utils
 
         public class SimplifiedConsoleLogger : ILogger
         {
+            private static readonly object Locker = new();
+            
             private readonly string _categoryName;
 
             public bool IncludeLogLevel { get; set; }
@@ -33,6 +35,12 @@ namespace GodelTech.CodeReview.Orchestrator.Utils
                 if (!IsEnabled(logLevel))
                     return;
 
+                lock (Locker)
+                    LogInternal(logLevel, eventId, state, exception, formatter);
+            }
+
+            private void LogInternal<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            {
                 var builder = new StringBuilder();
 
                 builder.Append("[");

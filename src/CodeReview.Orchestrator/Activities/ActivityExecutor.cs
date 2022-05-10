@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
@@ -29,15 +30,15 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
 
         public async Task<ExecutionResult> ExecuteAsync(
             ActivityManifest manifest,
-            bool readLogs, 
+            bool readLogs,
             IProcessingContext context)
         {
             await _dockerContextSwitcher.SwitchAsync(context, manifest.Requirements);
-            
+
             OverrideVolumes(context, manifest);
-            
+
             _logger.LogInformation("Current Docker Engine: {engine}", _engineContext.Engine.Name);
-            
+
             var mounts = ResolveMountedVolumes(context).ToArray();
 
             _logger.LogInformation("Creating container. Image = {imageName}...", manifest.Image);
@@ -48,18 +49,29 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 mounts);
             _logger.LogInformation("Container created.");
 
+            IContainerLogListener logListener = null;
             try
             {
+                if (readLogs)
+                {
+                    _logger.LogInformation("Attaching to the container. ContainerId = {containerId}...", containerId);
+
+                    logListener = await _containerService.AttachToContainerStream(containerId, manifest.Settings.WaitTimeoutSeconds);
+
+                    _logger.LogInformation("Attached to the container. ContainerId = {containerId}...", containerId);
+                }
+
                 _logger.LogInformation("Starting container. ContainerId = {containerId}...", containerId);
+
                 await _containerService.StartContainerAsync(containerId);
+                logListener?.StartListening();
+
                 _logger.LogInformation("Container started. ContainerId = {containerId}", containerId);
 
                 _logger.LogInformation("Waiting for container. ContainerId = {containerId}...", containerId);
 
-                if (readLogs)
-                    await _containerService.AttachToContainerStream(containerId);
-                else
-                    await _containerService.WaitContainer(containerId, manifest.Settings.WaitTimeoutSeconds);
+                await _containerService.WaitContainer(containerId, manifest.Settings.WaitTimeoutSeconds);
+                logListener?.StopListening();
 
                 _logger.LogInformation("Container exited. ContainerId = {containerId}", containerId);
 
@@ -70,7 +82,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 {
                     ExitCode = exitCode
                 };
-            } 
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to run container. {ex.Message}");
@@ -78,6 +90,8 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             }
             finally
             {
+                logListener?.StopListening();
+
                 _logger.LogInformation("Stopping container. ContainerId = {containerId}...", containerId);
                 await _containerService.StopContainerAsync(containerId);
                 _logger.LogInformation("Container stopped. ContainerId = {containerId}", containerId);
@@ -96,7 +110,7 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                     volume.TargetFolder = activityVolume.TargetFolder;
             }
         }
-        
+
         private static IEnumerable<MountedVolume> ResolveMountedVolumes(IProcessingContext context)
         {
             return context.Volumes.Select(volume => new MountedVolume

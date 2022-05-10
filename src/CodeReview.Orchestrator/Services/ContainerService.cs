@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Docker.DotNet;
@@ -23,19 +21,19 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         private readonly IDockerClientFactory _dockerClientFactory;
         private readonly IDockerEngineContext _dockerEngineContext;
-        private readonly ILogger<ContainerService> _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly INameFactory _nameFactory;
 
         public ContainerService(
             IDockerClientFactory dockerClientFactory,
             IDockerEngineContext dockerEngineContext,
-            ILogger<ContainerService> logger,
+            ILoggerFactory loggerFactory,
             INameFactory nameFactory)
         {
             _dockerClientFactory = dockerClientFactory ?? throw new ArgumentNullException(nameof(dockerClientFactory));
             _dockerEngineContext = dockerEngineContext ?? throw new ArgumentNullException(nameof(dockerEngineContext));
+            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _nameFactory = nameFactory ?? throw new ArgumentNullException(nameof(nameFactory));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<bool> ImageExists(string imageName)
@@ -230,21 +228,25 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             });
         }
 
-        public async Task AttachToContainerStream(string containerId)
+        public async Task<IContainerLogListener> AttachToContainerStream(string containerId, long waitTimeoutSeconds = 900)
         {
             if (string.IsNullOrWhiteSpace(containerId))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerId));
 
             using var client = _dockerClientFactory.Create();
 
-            using var stream = await client.Containers.AttachContainerAsync(containerId, false, new ContainerAttachParameters
+            var stream = await client.Containers.AttachContainerAsync(containerId, false, new ContainerAttachParameters
             {
                 Stdout = true,
                 Stderr = true,
                 Stream = true
             });
 
-            await LogContainerStream(containerId, stream);
+            return new ContainerLogListener(
+                _loggerFactory.CreateLogger<ContainerLogListener>(),
+                waitTimeoutSeconds,
+                containerId,
+                stream);
         }
 
         public async Task<string> CreateVolumeAsync(string volumePrefix)
@@ -303,42 +305,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             catch (DockerContainerNotFoundException)
             {
                 return null;
-            }
-        }
-
-        private async Task LogContainerStream(string containerId, MultiplexedStream stream)
-        {
-            var buffer = ArrayPool<byte>.Shared.Rent(81920);
-
-            try
-            {
-                while (true)
-                {
-                    var result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None).ConfigureAwait(false);
-                    
-                    if (result.EOF)
-                        return;
-
-                    var dockerLog = Encoding.Default.GetString(buffer, 0, result.Count);
-                    var dockerLogs = dockerLog.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (var log in dockerLogs)
-                    {
-                        switch (result.Target)
-                        {
-                            case MultiplexedStream.TargetStream.StandardOut:
-                                _logger.LogInformation("Container={containerId} Stdout: {stdOut}", containerId, log);
-                                break;
-                            case MultiplexedStream.TargetStream.StandardError:
-                                _logger.LogError("Container={containerId} Stderr: {stdOut}", containerId, log);
-                                break;
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
     }
