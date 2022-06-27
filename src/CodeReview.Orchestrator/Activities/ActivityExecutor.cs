@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Services;
+using GodelTech.CodeReview.Orchestrator.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace GodelTech.CodeReview.Orchestrator.Activities
@@ -49,29 +50,19 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 mounts);
             _logger.LogInformation("Container created.");
 
-            IContainerLogListener logListener = null;
             try
             {
-                if (readLogs)
-                {
-                    _logger.LogInformation("Attaching to the container. ContainerId = {containerId}...", containerId);
-
-                    logListener = await _containerService.AttachToContainerStream(containerId, manifest.Settings.WaitTimeoutSeconds);
-
-                    _logger.LogInformation("Attached to the container. ContainerId = {containerId}...", containerId);
-                }
+                await using var _ = await AttachedToContainerAsync(readLogs, containerId, manifest.Settings.WaitTimeoutSeconds);
 
                 _logger.LogInformation("Starting container. ContainerId = {containerId}...", containerId);
 
                 await _containerService.StartContainerAsync(containerId);
-                logListener?.StartListening();
 
                 _logger.LogInformation("Container started. ContainerId = {containerId}", containerId);
 
                 _logger.LogInformation("Waiting for container. ContainerId = {containerId}...", containerId);
 
                 await _containerService.WaitContainer(containerId, manifest.Settings.WaitTimeoutSeconds);
-                logListener?.StopListening();
 
                 _logger.LogInformation("Container exited. ContainerId = {containerId}", containerId);
 
@@ -90,8 +81,6 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
             }
             finally
             {
-                logListener?.StopListening();
-
                 _logger.LogInformation("Stopping container. ContainerId = {containerId}...", containerId);
                 await _containerService.StopContainerAsync(containerId);
                 _logger.LogInformation("Container stopped. ContainerId = {containerId}", containerId);
@@ -100,6 +89,18 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 await _containerService.RemoveContainerAsync(containerId);
                 _logger.LogInformation("Container removed. ContainerId = {containerId}", containerId);
             }
+        }
+
+        private async Task<IAsyncDisposable> AttachedToContainerAsync(bool readLogs, string containerId, long waitTimeoutSeconds)
+        {
+            if (!readLogs)
+                return Disposable.AsyncEmpty;
+
+            _logger.LogInformation("Attaching to the container. ContainerId = {containerId}...", containerId);
+            var logListener = await _containerService.AttachToContainerStream(containerId, waitTimeoutSeconds);
+            _logger.LogInformation("Attached to the container. ContainerId = {containerId}...", containerId);
+
+            return logListener;
         }
 
         private static void OverrideVolumes(IProcessingContext context, ActivityManifest activityManifest)

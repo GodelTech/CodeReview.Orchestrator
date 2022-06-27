@@ -15,12 +15,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         private readonly string _containerId;
         private readonly MultiplexedStream _stream;
         private readonly CancellationTokenSource _cancellationTokenSource;
-
-        private Task _listenTask;
+        private readonly Task _listenTask;
 
         public ContainerLogListener(ILogger<ContainerLogListener> logger,
             long waitTimeoutSeconds,
-            string containerId, 
+            string containerId,
             MultiplexedStream stream)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -28,34 +27,30 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
             _cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(waitTimeoutSeconds));
-        }
-
-        public void StartListening()
-        {
-            if (_listenTask != null)
-                throw new InvalidOperationException("Already listening a stream");
-
             _listenTask = Task.Factory.StartNew(Listen, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
         }
 
-        public void StopListening()
+        public Task CloseAsync()
         {
             if (_listenTask == null || _cancellationTokenSource.IsCancellationRequested)
-                return;
+                return Task.CompletedTask;
 
-            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel(false);
+            return _listenTask;
         }
 
         private void Listen(object obj)
         {
-            var buffer = ArrayPool<byte>.Shared.Rent(81920);
+            const int minimumBufferLength = 81920;
+
+            var buffer = ArrayPool<byte>.Shared.Rent(minimumBufferLength);
 
             try
             {
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     var result = _stream.ReadOutputAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token).GetAwaiter().GetResult();
-                    
+
                     if (result.EOF)
                         return;
 
@@ -76,13 +71,25 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     }
                 }
             }
-            catch (TaskCanceledException) { }
+            catch (TaskCanceledException)
+            {
+                _logger.LogDebug("Container={containerId} The container listening task has been canceled", _containerId);
+            }
             finally
             {
                 ArrayPool<byte>.Shared.Return(buffer);
-
-                _stream.Dispose();
             }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                _cancellationTokenSource.Cancel(false);
+                await _listenTask;
+            }
+
+            _stream.Dispose();
         }
     }
 }

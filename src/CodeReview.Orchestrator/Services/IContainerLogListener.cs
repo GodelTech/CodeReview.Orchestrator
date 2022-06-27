@@ -1,8 +1,10 @@
+using System;
+using System.Threading.Tasks;
+
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
-    public interface IContainerLogListener
+    public interface IContainerLogListener : IAsyncDisposable
     {
-        void StartListening();
-        void StopListening();
+        Task CloseAsync();
     }
 }
