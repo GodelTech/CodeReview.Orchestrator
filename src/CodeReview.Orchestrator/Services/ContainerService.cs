@@ -244,7 +244,6 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             return new ContainerLogListener(
                 _loggerFactory.CreateLogger<ContainerLogListener>(),
-                waitTimeoutSeconds,
                 containerId,
                 stream);
         }

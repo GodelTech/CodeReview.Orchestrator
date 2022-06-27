@@ -5,6 +5,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface IContainerLogListener : IAsyncDisposable
     {
+        void Start(long timeoutSeconds);
         Task CloseAsync();
     }
 }

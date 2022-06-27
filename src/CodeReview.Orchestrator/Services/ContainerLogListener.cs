@@ -14,25 +14,32 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         private readonly string _containerId;
         private readonly MultiplexedStream _stream;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly Task _listenTask;
+
+        private Task _listenTask;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public ContainerLogListener(ILogger<ContainerLogListener> logger,
-            long waitTimeoutSeconds,
             string containerId,
             MultiplexedStream stream)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _containerId = containerId ?? throw new ArgumentNullException(nameof(containerId));
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+        }
 
-            _cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(waitTimeoutSeconds));
+        public void Start(long timeoutSeconds)
+        {
+            if (_listenTask != null)
+                throw new InvalidOperationException($"ContainerId={_containerId} Listener already listen the container");
+
+            _cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+
             _listenTask = Task.Factory.StartNew(Listen, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
         }
 
         public Task CloseAsync()
         {
-            if (_listenTask == null || _cancellationTokenSource.IsCancellationRequested)
+            if (_listenTask == null || _cancellationTokenSource?.IsCancellationRequested != false)
                 return Task.CompletedTask;
 
             _cancellationTokenSource.Cancel(false);

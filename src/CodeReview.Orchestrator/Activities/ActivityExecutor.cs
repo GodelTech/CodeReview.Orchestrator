@@ -97,7 +97,10 @@ namespace GodelTech.CodeReview.Orchestrator.Activities
                 return Disposable.AsyncEmpty;
 
             _logger.LogInformation("Attaching to the container. ContainerId = {containerId}...", containerId);
+
             var logListener = await _containerService.AttachToContainerStream(containerId, waitTimeoutSeconds);
+            logListener.Start(waitTimeoutSeconds);
+
             _logger.LogInformation("Attached to the container. ContainerId = {containerId}...", containerId);
 
             return logListener;
