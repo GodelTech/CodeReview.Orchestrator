@@ -14,6 +14,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             return Path.GetTempPath();
         }
 
+        public string GetTempFileName()
+        {
+            return Path.GetTempFileName();
+        }
+
         public string GetDirectoryName(string path)
         {
             return Path.GetDirectoryName(path);
@@ -27,6 +32,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         public string Combine(params string[] parts)
         {
             return Path.Combine(parts);
+        }
+
+        public string ChangeExtensions(string path, string ext)
+        {
+            return Path.ChangeExtension(path, ext);
         }
     }
 }

@@ -4,7 +4,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public interface ITarArchiveService
     {
-        Stream Create(string path);
+        Stream CreateInMemory(string path);
+        Stream CreateInFile(string path, string tmpFilePath);
         void Extract(Stream inStream, string folderPath, string pathToRemove);
     }
 }

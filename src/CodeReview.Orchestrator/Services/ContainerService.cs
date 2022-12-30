@@ -157,7 +157,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(containerPath));
 
             using var client = _dockerClientFactory.Create();
-            
+
             await client.Containers.ExtractArchiveToContainerAsync(
                 containerId,
                 new ContainerPathStatParameters
