@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ByteSizeLib;
 using GodelTech.CodeReview.Orchestrator.Activities;
 using GodelTech.CodeReview.Orchestrator.Model;
 using GodelTech.CodeReview.Orchestrator.Utils;
@@ -12,6 +11,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class DockerVolumeImporter : IDockerVolumeImporter
     {
+        private static readonly ByteSize MaxInMemoryArchiveSize = ByteSize.FromMegabytes(300);
+
         private readonly ITempFileFactory _tempFileFactory;
         private readonly IContainerService _containerService;
         private readonly IDirectoryService _directoryService;
@@ -20,9 +21,9 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         public DockerVolumeImporter(
             ITempFileFactory tempFileFactory,
-            IContainerService containerService, 
-            IDirectoryService directoryService, 
-            ITarArchiveService tarArchiveService, 
+            IContainerService containerService,
+            IDirectoryService directoryService,
+            ITarArchiveService tarArchiveService,
             IDockerEngineContext dockerEngineContext)
         {
             _tempFileFactory = tempFileFactory ?? throw new ArgumentNullException(nameof(tempFileFactory));
@@ -41,12 +42,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                 foreach (var volume in volumes)
                 {
                     var folderPath = context.ResolvePath(volume.FolderToImport);
-                    
+
                     if (!_directoryService.Exists(folderPath))
                         continue;
 
                     Stream outStream;
-                    using var _ = _directoryService.DirectorySize(folderPath) <= ByteSize.FromMegaBytes(300)
+                    using var _ = _directoryService.GetDirectorySize(folderPath) <= MaxInMemoryArchiveSize
                         ? CreateArchiveInMemory(folderPath, out outStream)
                         : CreateArchiveInFileSystem(folderPath, out outStream);
 
@@ -63,10 +64,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         {
             stream = _tarArchiveService.CreateInMemory(path);
 
-            return Disposable.CreateDisposableAction(stream, static toDispose =>
-            {
-                toDispose.Dispose();
-            });
+            return Disposable.CreateDisposableAction(stream, static toDispose => { toDispose.Dispose(); });
         }
 
         private IDisposable CreateArchiveInFileSystem(string path, out Stream stream)

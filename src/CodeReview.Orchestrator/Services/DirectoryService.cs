@@ -1,7 +1,6 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using ByteSizeLib;
+using GodelTech.CodeReview.Orchestrator.Utils;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
@@ -12,7 +11,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             return Directory.Exists(path);
         }
 
-        public ByteSize DirectorySize(string path)
+        public ByteSize GetDirectorySize(string path)
         {
             var bytes = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
                 .Select(p => new FileInfo(p))
