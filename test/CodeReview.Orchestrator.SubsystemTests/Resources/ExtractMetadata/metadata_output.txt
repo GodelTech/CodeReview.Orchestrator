@@ -67,7 +67,7 @@
           "LongName": "file",
           "ShortName": "f",
           "IsOptional": true,
-          "Description": "Path to workflow file"
+          "Description": "Path/URL to workflow file"
         },
         {
           "LongName": "docker-engines",
