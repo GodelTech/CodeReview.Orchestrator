@@ -20,7 +20,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             _manifestProvider = manifestProvider ?? throw new ArgumentNullException(nameof(manifestProvider));
             _manifestValidator = manifestValidator ?? throw new ArgumentNullException(nameof(manifestValidator));
         }
-        
+
         public async Task InitializeAsync(string manifestFilePath)
         {
             if (string.IsNullOrWhiteSpace(manifestFilePath))
@@ -55,10 +55,12 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                     IsDefault = manifest.DefaultEngine.Equals(name, StringComparison.OrdinalIgnoreCase),
                     Name = name,
                     Url = engineManifest.Url,
-                    ResourceLabel = engineManifest.ResourceLabel
+                    ResourceLabel = engineManifest.ResourceLabel,
+                    AuthType = engineManifest.AuthType,
+                    BasicAuthCredentials = engineManifest.BasicAuthCredentials,
+                    CertificateCredentials = engineManifest.CertificateCredentials
                 });
             }
-            
         }
 
         public IEnumerable<DockerEngine> ListAll()
@@ -68,7 +70,7 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
         public DockerEngine Find(RequirementsManifest requirements)
         {
-            if (requirements == null) 
+            if (requirements == null)
                 throw new ArgumentNullException(nameof(requirements));
 
             var engineQuery = _engines.AsQueryable();
