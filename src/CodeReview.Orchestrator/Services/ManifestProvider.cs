@@ -38,18 +38,18 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (Uri.TryCreate(path, UriKind.Absolute, out var url))
             {
                 var client = new WebClient();
-                content = client.DownloadString(url);
+
+                content = await client.DownloadStringTaskAsync(url);
+            }
+            else if (!_fileService.Exists(path))
+            {
+                content = await _fileService.ReadAllTextAsync(path);
             }
             else
             {
-                if (!_fileService.Exists(path))
-                {
-                    _logger.LogError("File doesn't exists: {filePath}", _pathService.GetFullPath(path));
+                _logger.LogError("File doesn't exists: {filePath}", _pathService.GetFullPath(path));
 
-                    return null;
-                }
-
-                content = await _fileService.ReadAllTextAsync(path);
+                return null;
             }
 
             try
