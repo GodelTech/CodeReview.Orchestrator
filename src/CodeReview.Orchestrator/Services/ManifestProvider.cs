@@ -37,11 +37,11 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 
             if (Uri.TryCreate(path, UriKind.Absolute, out var url))
             {
-                var client = new WebClient();
+                using var client = new WebClient();
 
                 content = await client.DownloadStringTaskAsync(url);
             }
-            else if (!_fileService.Exists(path))
+            else if (_fileService.Exists(path))
             {
                 content = await _fileService.ReadAllTextAsync(path);
             }
