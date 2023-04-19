@@ -16,5 +16,11 @@ namespace GodelTech.CodeReview.Orchestrator.Model
         public string ResourceLabel { get; set; }
 
         public string[] Features { get; set; }
+
+        public AuthType AuthType { get; set; } 
+
+        public BasicAuthCredentials BasicAuthCredentials { get; set; }
+
+        public CertificateCredentials CertificateCredentials { get; set; }
     }
 }

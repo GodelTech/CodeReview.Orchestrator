@@ -11,5 +11,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
         public string Url { get; set; }
         public string[] Features { get; set; }
         public string WorkerImage { get; set; }
+        public AuthType? AuthType { get; set; }
+        public BasicAuthCredentials BasicAuthCredentials { get; set; }
+        public CertificateCredentials CertificateCredentials { get; set; }
     }
 }
