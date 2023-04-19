@@ -5,7 +5,7 @@ namespace GodelTech.CodeReview.Orchestrator.Options
     [Verb("run", true, HelpText = "Runs workflow defined by manifest file.")]
     public class RunOptions
     {
-        [Option('f', "file", Required = true, HelpText = "Path to workflow file")]
+        [Option('f', "file", Required = true, HelpText = "Path/URL to workflow file")]
         public string File { get; set; }
         
         [Option('d', "docker-engines", Required = false, HelpText = "Docker Engine collection file path")]

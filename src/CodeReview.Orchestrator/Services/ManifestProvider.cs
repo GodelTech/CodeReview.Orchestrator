@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using GodelTech.CodeReview.Orchestrator.Model;
 using Microsoft.Extensions.Logging;
@@ -31,14 +33,24 @@ namespace GodelTech.CodeReview.Orchestrator.Services
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(path));
 
-            if (!_fileService.Exists(path))
+            string content;
+
+            if (Uri.TryCreate(path, UriKind.Absolute, out var url))
+            {
+                using var client = new WebClient();
+
+                content = await client.DownloadStringTaskAsync(url);
+            }
+            else if (_fileService.Exists(path))
+            {
+                content = await _fileService.ReadAllTextAsync(path);
+            }
+            else
             {
                 _logger.LogError("File doesn't exists: {filePath}", _pathService.GetFullPath(path));
-                
+
                 return null;
             }
-            
-            var content = await _fileService.ReadAllTextAsync(path);
 
             try
             {

@@ -11,6 +11,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
         private const string EvalOutputName = nameof(EvaluateManifestTests) + "_eval_output.txt";
         private const string ManifestOutputName = nameof(EvaluateManifestTests) + "_git-roslyn-converter.yaml";
         private const string InvalidManifestOutputName = nameof(EvaluateManifestTests) + "_git-roslyn-converter_invalid.yaml";
+        private const string ManifestUrl = "https://raw.githubusercontent.com/GodelTech/CodeReview.Orchestrator/main/test/CodeReview.Orchestrator.SubsystemTests/Resources/EvaluateManifest/git-roslyn-converter.yaml";
 
         private static readonly string EvalOutputPath = FileHelper.GetOutputPath(EvalOutputName);
         private static readonly string ManifestOutputPath = FileHelper.GetOutputPath(ManifestOutputName);
@@ -24,7 +25,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
             FileHelper.CopyFromResource(manifestResourceName, ManifestOutputPath);
             FileHelper.CopyFromResource(invalidManifestResourceName, InvalidManifestOutputPath);
         }
-        
+
         [Theory]
         [InlineData("-f")]
         [InlineData("--file")]
@@ -40,7 +41,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .ExitCode(Constants.ExitCode.Error))
                 .Run();
         }
-        
+
         [Theory]
         [InlineData("--output")]
         [InlineData("-output")]
@@ -56,7 +57,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .ExitCode(Constants.ExitCode.Error))
                 .Run();
         }
-        
+
         [Theory]
         [InlineData("-f", "-o")]
         [InlineData("--file", "-o")]
@@ -75,7 +76,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .ExitCode(Constants.ExitCode.Error))
                 .Run();
         }
-        
+
         [Theory]
         [InlineData("-f", "-o")]
         [InlineData("--file", "-o")]
@@ -94,7 +95,7 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .ExitCode(Constants.ExitCode.Error))
                 .Run();
         }
-        
+
         [Theory]
         [InlineData("-f", "-o")]
         [InlineData("--file", "-o")]
@@ -112,6 +113,28 @@ namespace CodeReview.Orchestrator.SubsystemTests.Tests
                     .WithCommandArg(outputArg, EvalOutputPath))
                 .Then()
                     .Expects<ProcessResult>(proc => proc
+                    .FileEqualToTheResource(EvalOutputPath, evalResourceName)
+                    .ExitCode(Constants.ExitCode.Ok))
+                .Run();
+        }
+
+        [Theory]
+        [InlineData("-f", "-o")]
+        [InlineData("--file", "-o")]
+        [InlineData("-f", "--output")]
+        [InlineData("--file", "--output")]
+        public void When_URL_Manifest_Is_Valid_Should_Return_Ok(string fileArg, string outputArg)
+        {
+            const string evalResourceName = "EvaluateManifest.eval_output.txt";
+
+            Scenario.New()
+                .When()
+                .Performs<ExecuteProcess>(proc => proc
+                    .WithCommandArg("eval", string.Empty)
+                    .WithCommandArg(fileArg, ManifestUrl)
+                    .WithCommandArg(outputArg, EvalOutputPath))
+                .Then()
+                .Expects<ProcessResult>(proc => proc
                     .FileEqualToTheResource(EvalOutputPath, evalResourceName)
                     .ExitCode(Constants.ExitCode.Ok))
                 .Run();
