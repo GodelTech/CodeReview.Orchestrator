@@ -99,6 +99,7 @@ namespace GodelTech.CodeReview.Orchestrator
             serviceProvider.AddSingleton<IDockerEngineContext, DockerEngineContext>();
             serviceProvider.AddSingleton<IVariableExpressionProvider, VariableExpressionProvider>();
             serviceProvider.AddSingleton<IGuidFactory, GuidFactory>();
+            serviceProvider.AddSingleton<ITempFileFactory, TempFileFactory>();
 
             serviceProvider.AddTransient<ITempFolderFactory, TempFolderFactory>();
             serviceProvider.AddTransient<IDockerContextSwitcher, DockerContextSwitcher>();

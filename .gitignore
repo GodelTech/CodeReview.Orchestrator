@@ -404,3 +404,6 @@ ASALocalRun/
 
 # docker
 *.env
+
+# Rider IDE
+.idea/

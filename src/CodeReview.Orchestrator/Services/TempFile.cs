@@ -1,20 +1,20 @@
-﻿using System;
+using System;
 
 namespace GodelTech.CodeReview.Orchestrator.Services
 {
-    public class TempFolder : IDisposable
+    public class TempFile : IDisposable
     {
         private readonly Action _cleanUpAction;
 
         public string Path { get; }
 
-        public TempFolder(string tempFolderPath, Action cleanUpAction)
+        public TempFile(string path, Action cleanUpAction)
         {
             _cleanUpAction = cleanUpAction ?? throw new ArgumentNullException(nameof(cleanUpAction));
-            Path = tempFolderPath ?? throw new ArgumentNullException(nameof(tempFolderPath));
+            Path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             _cleanUpAction();
         }
