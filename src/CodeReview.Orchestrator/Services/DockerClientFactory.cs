@@ -9,6 +9,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
 {
     public class DockerClientFactory : IDockerClientFactory
     {
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(10);
+
         private readonly IDockerEngineContext _engineContext;
 
         public DockerClientFactory(IDockerEngineContext engineContext)
@@ -26,7 +28,8 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                             new Uri(_engineContext.Engine.Url),
                             new BasicAuthCredentials(
                                 _engineContext.Engine.BasicAuthCredentials.Username,
-                                _engineContext.Engine.BasicAuthCredentials.Password))
+                                _engineContext.Engine.BasicAuthCredentials.Password),
+                            DefaultTimeout)
                         .CreateClient();
                 }
                 case AuthType.X509:
@@ -35,13 +38,15 @@ namespace GodelTech.CodeReview.Orchestrator.Services
                             new Uri(_engineContext.Engine.Url),
                             new CertificateCredentials(new X509Certificate2(
                                 _engineContext.Engine.CertificateCredentials.FileName,
-                                _engineContext.Engine.CertificateCredentials.Password)))
+                                _engineContext.Engine.CertificateCredentials.Password)),
+                            DefaultTimeout)
                         .CreateClient();
                 }
                 default:
                 {
                     return new DockerClientConfiguration(
-                            new Uri(_engineContext.Engine.Url))
+                            new Uri(_engineContext.Engine.Url),
+                            defaultTimeout: DefaultTimeout)
                         .CreateClient();
                 }
             }
