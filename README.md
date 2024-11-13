@@ -1,6 +1,6 @@
 # CodeReview.Orchestrator
 
-NuGet: https://hub.docker.com/r/godeltech/codereview.orchestrator
+Docker image: https://hub.docker.com/r/godeltech/codereview.orchestrator
 
 ## Description
 
