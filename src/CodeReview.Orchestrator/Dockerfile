@@ -1,5 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /app
 COPY ["CodeReview.Orchestrator/*.csproj", "CodeReview.Orchestrator/"]
 RUN dotnet restore "CodeReview.Orchestrator/CodeReview.Orchestrator.csproj" -r linux-musl-x64 --force
